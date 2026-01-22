@@ -1,0 +1,12 @@
+# macOS junk
+.DS_Store
+
+# Build artifacts
+build/
+
+# Don't commit the conda recipe
+conda-recipe/
+
+# Local notes
+TODO
+tests/testingcommands.txt
