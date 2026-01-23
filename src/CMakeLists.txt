@@ -15,7 +15,7 @@ set(CONSTRUCTION_SOURCES
     constructions/doubling.c
     constructions/ext_by_one.c
     constructions/finite_fields_wrapper.c
-    constructions/fixed_CFFs.c
+    constructions/fixed_cffs.c
     constructions/id.c
     constructions/kronecker.c
     constructions/optimized_kronecker.c

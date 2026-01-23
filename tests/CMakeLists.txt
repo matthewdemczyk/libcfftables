@@ -1,12 +1,20 @@
-#tests cmake
-# Create test executables
-add_executable(test_cff test_cff.c)
-add_executable(test_cff_direct_constructions test_cff_direct_constructions.c)
+# tests/CMakeLists.txt
 
-# Link against the cfftables target (not installed library)
-target_link_libraries(test_cff PRIVATE libcfftables)
-target_link_libraries(test_cff_direct_constructions PRIVATE libcfftables)
+# Collect all .c files in this directory
+file(GLOB TEST_SOURCES CONFIGURE_DEPENDS
+    "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+)
 
-# Register test with CTest
-add_test(NAME test_cff COMMAND test_cff)
-add_test(NAME test_cff_direct_constructions COMMAND test_cff_direct_constructions)
+foreach(test_src ${TEST_SOURCES})
+    # Get filename without extension (e.g. test_cff.c -> test_cff)
+    get_filename_component(test_name ${test_src} NAME_WE)
+
+    # Create executable
+    add_executable(${test_name} ${test_src})
+
+    # Link against libcfftables
+    target_link_libraries(${test_name} PRIVATE libcfftables)
+
+    # Register test with CTest
+    add_test(NAME ${test_name} COMMAND ${test_name})
+endforeach()
