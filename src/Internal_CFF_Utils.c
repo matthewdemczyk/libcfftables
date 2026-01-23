@@ -10,7 +10,7 @@
     Returns 0 if overflow occurrs during addition in the function,
     or if the parameters are invalid (n < 1 OR n < k OR k < 0)
 */
-unsigned long long choose(int n, int k)
+long long choose(int n, int k)
 {
     // invalid inputs
     if (n < k || n < 0 || k < 0)
@@ -30,10 +30,10 @@ unsigned long long choose(int n, int k)
         return 1;
     }
 
-    unsigned long long a[k+1]; // previous row of pascal's triangle
-    unsigned long long b[k+1]; // current row of pascal's triangle
+    long long a[k+1]; // previous row of pascal's triangle
+    long long b[k+1]; // current row of pascal's triangle
 
-    unsigned long long *a_ptr, *b_ptr, *swap_ptr;
+    long long *a_ptr, *b_ptr, *swap_ptr;
     a_ptr = a;
     b_ptr = b;
 
@@ -142,12 +142,11 @@ int ipow(int base, int exp)
 
 
 // https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
-void prime_power_sieve(int n, bool prime_array[n], bool prime_power_array[n])
+void prime_power_sieve(int n, bool *prime_array)
 {
     // set initial array values
     for (int i = 0; i < n; i++)
     {
-        prime_power_array[i] = false;
         prime_array[i] = true;
     }
 
@@ -162,27 +161,6 @@ void prime_power_sieve(int n, bool prime_array[n], bool prime_power_array[n])
             for (int i = p * p; i < n; i += p)
             {
                 prime_array[i] = false;
-            }
-        }
-    }
-
-    // for each prime number, mark all multiples of it and itself as prime powers
-    for (int i = 2; i < n; i++)
-    {
-        if (prime_array[i])
-        {
-            prime_power_array[i] = true;
-
-            // Use long long to prevent integer overflow
-            long long prime_power = (long long)i * i;
-            while (prime_power < n)
-            {
-                // Safely mark prime powers within array bounds
-                prime_power_array[prime_power] = true;
-                // Check if next multiplication would cause overflow or exceed n
-                if (prime_power > (long long)n / i)
-                    break;
-                prime_power *= i;
             }
         }
     }

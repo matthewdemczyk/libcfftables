@@ -41,7 +41,7 @@ struct cff_table_ctx
     CFF_Table **tables_array;
 };
 
-unsigned long long choose(int n, int k);
+long long choose(int n, int k);
 
 long factorial(int n);
 
@@ -55,7 +55,7 @@ bool nextLexicographicTuple(int n, int k, int *buffer);
 
 int ipow(int base, int exp);
 
-void prime_power_sieve(int n, bool prime_array[n], bool prime_power_array[n]);
+void prime_power_sieve(int n, bool *prime_array);
 
 // helper to search table for some row with a cff with at least n columns
 int binarySearchTable(CFF_Table *table, long long n);
