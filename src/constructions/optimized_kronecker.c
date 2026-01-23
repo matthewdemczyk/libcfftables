@@ -105,7 +105,7 @@ cff_t* cff_optimized_kronecker
 void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d)
 {
     int t, s;
-    CFF_n_type n;
+    unsigned long long n;
     for (int t1 = cff_d; t1 < table->numCFFs - 1; t1++)
     {
         for (int t2 = t1; t2 < table->numCFFs; t2++)

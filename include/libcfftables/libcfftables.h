@@ -15,7 +15,7 @@ extern "C" {
  * ============================================================================ */
 
 typedef struct cff cff_t;
-typedef unsigned long long CFF_n_type;
+typedef struct cff_table_ctx cff_table_ctx_t;
 
 /* ============================================================================
  * Core CFF Operations
@@ -79,7 +79,7 @@ cff_t* cff_optimized_kronecker
  * ============================================================================ */
 
 // initializes global_tables_array (must be freed with freeGlobalTableArray)
-void cff_table_create(unsigned d_maximum, unsigned t_maximum, CFF_n_type n_maximum, bool printLoops, bool useBinConstWeightCodes);
+void cff_table_create(unsigned d_maximum, unsigned t_maximum, unsigned long long n_maximum, bool printLoops, bool useBinConstWeightCodes);
 
 // frees global_tables_array's memory
 void cff_table_free();

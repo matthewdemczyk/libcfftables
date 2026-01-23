@@ -3,6 +3,7 @@
 
 # Build artifacts
 build/
+Testing/
 
 # Don't commit the conda recipe
 conda-recipe/

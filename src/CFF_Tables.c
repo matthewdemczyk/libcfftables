@@ -10,7 +10,7 @@
 
 unsigned t_max;
 unsigned d_max;
-CFF_n_type n_max;
+unsigned long long n_max;
 CFF_Table **global_tables_array; //an array of pointers of size d_max
 
 cff_t* cff_table_get_by_t(int d, int t)
@@ -32,7 +32,7 @@ inline __attribute__((always_inline)) void updateTable(
 //void updateTable(
     CFF_Table *table,
     int t,
-    CFF_n_type n,
+    unsigned long long n,
     CFF_Construction_And_Name_Functions *cffFunctions,
     int consParam0,
     int consParam1,
@@ -64,7 +64,7 @@ inline __attribute__((always_inline)) void updateTable(
     }
 }
 
-int binarySearchTable(CFF_Table *table, CFF_n_type n) {
+int binarySearchTable(CFF_Table *table, unsigned long long n) {
     int low = 0;
     int high = table->numCFFs - 1;
 
@@ -138,7 +138,7 @@ CFF_Table* makeSpernerTable()
     return table;
 }
 
-void cff_table_create(unsigned d_maximum, unsigned t_maximum, CFF_n_type n_maximum, bool printLoops, bool useBinConstWeightCodes)
+void cff_table_create(unsigned d_maximum, unsigned t_maximum, unsigned long long n_maximum, bool printLoops, bool useBinConstWeightCodes)
 {
     // set globals for table bounds
     d_max = d_maximum;

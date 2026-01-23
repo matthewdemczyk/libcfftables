@@ -36,7 +36,7 @@ CFF_Construction_And_Name_Functions doublingConstructionFunctions = {
 // the function to fill in a table with the doubling construction parameters
 void doublingConstructionFiller(CFF_Table *table_2, CFF_Table *table_1)
 {
-    CFF_n_type n;
+    unsigned long long n;
     int s;
     for (int t = 2; t < table_2->numCFFs; t++)
     {

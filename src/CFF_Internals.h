@@ -17,7 +17,7 @@ struct cff
 
 extern unsigned d_max;
 extern unsigned t_max;
-extern CFF_n_type n_max;
+extern unsigned long long n_max;
 
 typedef void (*TableSourceShortSrcFormatter)(char*);
 typedef void (*TableSourceLongSrcFormatter)(short*, char*);
@@ -32,7 +32,7 @@ typedef struct
 
 typedef struct
 {
-    CFF_n_type n;
+    unsigned long long n;
     short consParams[5];
     CFF_Construction_And_Name_Functions *functions;
     cff_t *cff;
@@ -67,13 +67,13 @@ int ipow(int base, int exp);
 void prime_power_sieve(int n, bool prime_array[n], bool prime_power_array[n]);
 
 // helper to search table for some row with a cff with at least n columns
-int binarySearchTable(CFF_Table *table, CFF_n_type n);
+int binarySearchTable(CFF_Table *table, unsigned long long n);
 
 // called in loops to check constructions to update table with newly found CFFs
 void updateTable(
     CFF_Table *table,
     int t,
-    CFF_n_type n,
+    unsigned long long n,
     CFF_Construction_And_Name_Functions *cffFunctions,
     int consParam0,
     int consParam1,

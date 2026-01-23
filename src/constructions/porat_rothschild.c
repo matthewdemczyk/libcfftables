@@ -84,7 +84,7 @@ CFF_Construction_And_Name_Functions poratConstructionFunctions = {
 
 void addPoratCodes(CFF_Table* table, int cff_d, bool* prime_power_array)
 {
-    CFF_n_type cff_n;
+    unsigned long long cff_n;
     unsigned cff_t, r, k, m;
     double Hq;
     r = cff_d + 1;

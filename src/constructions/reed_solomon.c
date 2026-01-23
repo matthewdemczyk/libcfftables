@@ -40,7 +40,7 @@ CFF_Construction_And_Name_Functions rsConstructionFunctions = {
 
 void addReedSolomonCodes(CFF_Table *table, int cff_d, bool prime_array[])
 {
-    CFF_n_type cff_n;
+    unsigned long long cff_n;
     long long q;
     short m, short_m, short_k, exp;
     int cff_t;

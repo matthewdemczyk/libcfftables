@@ -30,7 +30,7 @@ CFF_Construction_And_Name_Functions stsConstructionFunctions = {
 
 void addSTS(CFF_Table *table)
 {
-    CFF_n_type n;
+    unsigned long long n;
     for (unsigned v = 2; v <= t_max; v++)
     {
         if (v % 6 == 3 || v % 6 == 1)
