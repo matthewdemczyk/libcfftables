@@ -13,7 +13,7 @@ extern CFF_Construction_And_Name_Functions shortRsConstructionFunctions;
 extern CFF_Construction_And_Name_Functions idConstructionFunctions;
 extern CFF_Construction_And_Name_Functions spernerConstructionFunctions;
 
-// these are defined in various CFF_Constructions/*.c files and are needed in src/CFF_Tables.c
+// these are defined in various constructions/*.c files and are needed in src/CFF_Tables.c
 void doublingConstructionFiller(CFF_Table *table_2, CFF_Table *table_1);
 void addSurveyCFFs(CFF_Table* table);
 void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d);

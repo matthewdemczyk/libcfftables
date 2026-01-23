@@ -1,4 +1,4 @@
-#include "Construction_Function_Internals.h"
+#include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
 
 #include <string.h>
@@ -9,7 +9,7 @@
 #include <stdlib.h>
 
 #include "../CFF_Internals.h"
-#include "Finite_Fields_Wrapper.h"
+#include "finite_fields_wrapper.h"
 
 
 void rsShortSrcFormatter(char *strBuffer)

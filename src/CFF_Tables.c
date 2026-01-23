@@ -6,7 +6,7 @@
 
 #include "CFF_Internals.h"
 
-#include "CFF_Constructions/Construction_Function_Internals.h"
+#include "constructions/construction_internals.h"
 
 unsigned t_max;
 unsigned d_max;

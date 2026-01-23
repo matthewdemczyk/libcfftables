@@ -1,10 +1,10 @@
-#include "Construction_Function_Internals.h"
+#include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
 
 #include <string.h>
 
 #include "../CFF_Internals.h"
-#include "Construction_Function_Internals.h"
+#include "construction_internals.h"
 
 
 void spernerShortSrcFormatter(char *strBuffer)

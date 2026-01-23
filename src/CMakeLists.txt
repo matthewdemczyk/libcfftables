@@ -11,19 +11,19 @@ set(CORE_SOURCES
 )
 
 set(CONSTRUCTION_SOURCES
-    CFF_Constructions/Additive_Construction.c
-    CFF_Constructions/Doubling_Construction.c
-    CFF_Constructions/Ext_By_One_Construction.c
-    CFF_Constructions/Finite_Fields_Wrapper.c
-    CFF_Constructions/Fixed_CFFs.c
-    CFF_Constructions/ID_Construction.c
-    CFF_Constructions/Kronecker_Construction.c
-    CFF_Constructions/Optimized_Kronecker_Construction.c
-    CFF_Constructions/Porat_Rothschild_Construction.c
-    CFF_Constructions/Reed_Solomon_Construction.c
-    CFF_Constructions/Short_Reed_Solomon_Construction.c
-    CFF_Constructions/Sperner_Construction.c
-    CFF_Constructions/STS_Construction.c
+    constructions/additive.c
+    constructions/doubling.c
+    constructions/ext_by_one.c
+    constructions/finite_fields_wrapper.c
+    constructions/fixed_CFFs.c
+    constructions/id.c
+    constructions/kronecker.c
+    constructions/optimized_kronecker.c
+    constructions/porat_rothschild.c
+    constructions/reed_solomon.c
+    constructions/short_reed_solomon.c
+    constructions/sperner.c
+    constructions/sts.c
 )
 
 # Create the library
@@ -37,7 +37,7 @@ target_include_directories(libcfftables
         $<INSTALL_INTERFACE:include>
     PRIVATE
         ${CMAKE_CURRENT_SOURCE_DIR}
-        ${CMAKE_CURRENT_SOURCE_DIR}/CFF_Constructions
+        ${CMAKE_CURRENT_SOURCE_DIR}/constructions
 )
 
 # Link libraries

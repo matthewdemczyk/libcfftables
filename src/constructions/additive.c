@@ -1,4 +1,4 @@
-#include "Construction_Function_Internals.h"
+#include "construction_internals.h"
 
 #include "../../include/libcfftables/libcfftables.h"
 #include "../CFF_Internals.h"
@@ -61,5 +61,5 @@ cff_t* cff_additive(const cff_t *left, const cff_t *right)
 }
 
 // the function to add additive construction parameters to the tables is in the file
-// src/CFF_Constructions/Optimized_Kronecker_Construction.c
+// src/constructions/Optimized_Kronecker_Construction.c
 // function: void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d);
