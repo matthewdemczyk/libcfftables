@@ -8,11 +8,36 @@
 
 #include "constructions/construction_internals.h"
 
-cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
+// this is used in cff_table_get_by_t_rec to keep track of
+// all itermediate CFFs created, then the CFFs are free'd
+// after the final CFF is constructed
+typedef struct IntermediateCFFsList {
+    int d;
+    int t;
+    struct IntermediateCFFsList *next;
+} IntermediateCFFsList;
+
+cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCFFsList **lst)
 {
     cff_t *cff;
     if (ctx->tables_array[d-1]->array[t].cff == NULL)
     {
+        IntermediateCFFsList *node = malloc(sizeof(IntermediateCFFsList));
+        if (node == NULL)
+        {   // handle malloc failure
+            // clean up the list we've built so far
+            IntermediateCFFsList *curr = *lst;
+            while (curr != NULL) {
+                IntermediateCFFsList *next = curr->next;
+                free(curr);
+                curr = next;
+            }
+            return NULL;
+        }
+        node->d = d;
+        node->t = t;
+        node->next = *lst; //prepend node to linked list
+        *lst = node;
         switch (ctx->tables_array[d-1]->array[t].constructionID)
         {
         case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
@@ -26,28 +51,28 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
             break;
         case CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD:
             cff = cff_porat_rothschild(
-                ctx->tables_array[d-1]->array[t].consParams[0],
-                ctx->tables_array[d-1]->array[t].consParams[1],
-                ctx->tables_array[d-1]->array[t].consParams[2],
-                ctx->tables_array[d-1]->array[t].consParams[3],
-                ctx->tables_array[d-1]->array[t].consParams[4]
+                (int) ctx->tables_array[d-1]->array[t].consParams[0],
+                (int) ctx->tables_array[d-1]->array[t].consParams[1],
+                (int) ctx->tables_array[d-1]->array[t].consParams[2],
+                (int) ctx->tables_array[d-1]->array[t].consParams[3],
+                (int) ctx->tables_array[d-1]->array[t].consParams[4]
             );
             break;
         case CFF_CONSTRUCTION_ID_REED_SOLOMON:
             cff = cff_reed_solomon(
-                ctx->tables_array[d-1]->array[t].consParams[0],
-                ctx->tables_array[d-1]->array[t].consParams[1],
-                ctx->tables_array[d-1]->array[t].consParams[2],
-                ctx->tables_array[d-1]->array[t].consParams[3]
+                (int) ctx->tables_array[d-1]->array[t].consParams[0],
+                (int) ctx->tables_array[d-1]->array[t].consParams[1],
+                (int) ctx->tables_array[d-1]->array[t].consParams[2],
+                (int) ctx->tables_array[d-1]->array[t].consParams[3]
             );
             break;
         case CFF_CONSTRUCTION_ID_SHORT_REED_SOLOMON:
             cff = cff_short_reed_solomon(
-                ctx->tables_array[d-1]->array[t].consParams[0],
-                ctx->tables_array[d-1]->array[t].consParams[1],
-                ctx->tables_array[d-1]->array[t].consParams[2],
-                ctx->tables_array[d-1]->array[t].consParams[3],
-                ctx->tables_array[d-1]->array[t].consParams[4]
+                (int) ctx->tables_array[d-1]->array[t].consParams[0],
+                (int) ctx->tables_array[d-1]->array[t].consParams[1],
+                (int) ctx->tables_array[d-1]->array[t].consParams[2],
+                (int) ctx->tables_array[d-1]->array[t].consParams[3],
+                (int) ctx->tables_array[d-1]->array[t].consParams[4]
             );
             break;
         case CFF_CONSTRUCTION_ID_FIXED_CFF:
@@ -55,28 +80,28 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
             break;
         case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
             // this can be improved a lot by checking how many ext by ones it will do in advance, then
-            // just doing an additive with a certain size in matrix
-            cff_t *to_extend = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
+            // just doing an additive with a certain size identity matrix
+            cff_t *to_extend = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
             cff = cff_extend_by_one(to_extend);
             break;
         case CFF_CONSTRUCTION_ID_ADDITIVE:
-            cff_t *right_k = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
-            cff_t *left_k = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
+            cff_t *right_k = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
+            cff_t *left_k = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
             cff = cff_additive(left_k, right_k);
             break;
         case CFF_CONSTRUCTION_ID_DOUBLING:
-            cff_t *smallerCFF = cff_table_get_by_t(ctx, 2, ctx->tables_array[1]->array[t].consParams[0]);
-            cff = cff_doubling(smallerCFF, ctx->tables_array[1]->array[t].consParams[1]);
+            cff_t *smallerCFF = cff_table_get_by_t_rec(ctx, 2, ctx->tables_array[1]->array[t].consParams[0], lst);
+            cff = cff_doubling(smallerCFF, (int) ctx->tables_array[1]->array[t].consParams[1]);
             break;
         case CFF_CONSTRUCTION_ID_KRONECKER:
-            cff_t *left = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
-            cff_t *right = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
+            cff_t *left = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
+            cff_t *right = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
             cff = cff_kronecker(left, right);
             break;
         case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER:
-            cff_t* inner = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
-            cff_t* bottom = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
-            cff_t* outer = cff_table_get_by_t(ctx, d-1, ctx->tables_array[d-1]->array[t].consParams[2]);
+            cff_t* inner = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
+            cff_t* bottom = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
+            cff_t* outer = cff_table_get_by_t_rec(ctx, d-1, ctx->tables_array[d-1]->array[t].consParams[2], lst);
             cff = cff_optimized_kronecker(outer, inner, bottom);
             break;
         default:
@@ -86,6 +111,34 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
     } else
     {
         cff = ctx->tables_array[d-1]->array[t].cff;
+    }
+    return cff;
+}
+
+cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
+{
+    // setup linked list of intermediate CFFs needed in construction
+    // so we can free them later without iterating over the entire table
+    IntermediateCFFsList *head = NULL;
+
+    // do the constructions
+    cff_t *cff = cff_table_get_by_t_rec(ctx, d, t, &head);
+
+    // free itermediate cffs
+    IntermediateCFFsList *curr = head;
+    while (curr != NULL)
+    {
+        IntermediateCFFsList *next = curr->next;
+        // dont free the one we want constructed!
+        if(!(curr->t == t && curr->d ==d))
+        {
+            cff_free(ctx->tables_array[curr->d-1]->array[curr->t].cff);
+        }
+        // always set this reference to NULL since the caller of this should
+        // free the cff themselves (otherwise table has a dangling pointer after cff_free)
+        ctx->tables_array[curr->d-1]->array[curr->t].cff = NULL;
+        free(curr);
+        curr = next;
     }
     return cff;
 }
@@ -221,9 +274,8 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
     ctx->n_max = n_maximum;
 
     // create an array of booleans to determine if numbers are prime/primepowers
-    bool *prime_power_array = malloc(sizeof(bool)*t_maximum + 1);
     bool *prime_array = malloc(sizeof(bool)*t_maximum + 1);
-    prime_power_sieve(t_maximum, prime_array, prime_power_array);
+    prime_power_sieve(t_maximum, prime_array);
 
     // each table is stored in this array of pointers to structs, where each struct is one table
     //CFF_Table* table_array[d_max];
@@ -275,7 +327,6 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
         if (printLoops) printf("looped %d times for d=%d\n", c, cff_d);
     }
     free(prime_array);
-    free(prime_power_array);
     return ctx;
 }
 
@@ -296,6 +347,7 @@ void cff_table_free(cff_table_ctx_t *ctx)
     {
         freeTable(ctx->tables_array[d]);
     }
+    free(ctx->tables_array);
     free(ctx);
 }
 
@@ -340,6 +392,7 @@ void cff_table_short_name(cff_table_ctx_t *ctx, int d, int t, char *str_buffer)
         strcpy(str_buffer, "Optimized Kronecker");
         break;
     default:
+        strcpy(str_buffer, "Unknown construction!!!");
         break;
     }
 }
@@ -386,6 +439,7 @@ void cff_table_long_name(cff_table_ctx_t *ctx, int d, int t, char *str_buffer)
         sprintf(str_buffer, "OKr(%hd;%hd;%hd)", consParams[0], consParams[1], consParams[2]);
         break;
     default:
+        strcpy(str_buffer, "Unknown construction!!!");
         break;
     }
 }
@@ -404,8 +458,6 @@ void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path)
         fprintf(fptr, "t,n,short source,long source");
         for (int t = 0; t < ctx->tables_array[i]->numCFFs; t++)
         {
-            //ctx->tables_array[i]->array[t].functions->shortSrcFormatter(shortSrc);
-            //ctx->tables_array[i]->array[t].functions->longSrcFormatter(ctx->tables_array[i]->array[t].consParams, longSrc);
             cff_table_short_name(ctx, i, t, shortSrc);
             cff_table_long_name(ctx, i, t, longSrc);
             fprintf(
