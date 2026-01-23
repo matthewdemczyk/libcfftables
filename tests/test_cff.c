@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include <libcfftables/libcfftables.h>
 
@@ -10,7 +9,7 @@
  void test_cff_alloc()
  {
     printf("Testing cff_alloc...\n");
-    cff_t *cff = cff_alloc(2,10,15);
+    cff_t *cff = cff_alloc(2, 10, 15);
     cff_print(cff);
     assert(cff_get_d(cff) == 2);
     assert(cff_get_t(cff) == 10);
@@ -41,12 +40,12 @@ void test_cff_null_free()
 void test_cff_set_get()
 {
     printf("Testing cff_set_get...\n");
-    cff_t *cff = cff_alloc(2,10,10);
-    cff_set_value(cff,0,0,1);
+    cff_t *cff = cff_alloc(2, 10, 10);
+    cff_set_value(cff, 0, 0, 1);
     cff_print(cff);
-    assert(cff_get_value(cff,0,0) == 1);
+    assert(cff_get_value(cff, 0, 0) == 1);
     //check other values are still zero
-    assert(cff_get_value(cff,1,1) == 0);
+    assert(cff_get_value(cff, 1, 1) == 0);
     cff_free(cff);
     printf("✓ cff_set_get test passed\n");
 }
@@ -54,7 +53,7 @@ void test_cff_set_get()
 void test_cff_verify_1()
 {
     printf("Testing cff_verify_1...\n");
-    cff_t *cff = cff_alloc(2,10,10);
+    cff_t *cff = cff_alloc(2, 10, 10);
     cff_print(cff);
     assert(cff_verify(cff) == false);
     cff_free(cff);
@@ -64,7 +63,7 @@ void test_cff_verify_1()
 void test_cff_verify_2()
 {
     printf("Testing cff_verify_2...\n");
-    cff_t *cff = cff_alloc(1,4,6);
+    cff_t *cff = cff_alloc(1, 4, 6);
     //set cff to sperner system for t=4
     cff_set_value(cff, 0, 0, 1);
     cff_set_value(cff, 0, 1, 1);
@@ -90,7 +89,7 @@ void test_cff_verify_2()
 void test_cff_verify_3()
 {
     printf("Testing cff_verify_3...\n");
-    cff_t *cff = cff_alloc(2,10,10);
+    cff_t *cff = cff_alloc(2, 10, 10);
     for (int i = 0; i < 10; i++)
     {
         for (int j = 0; j < 10; j++)
@@ -167,7 +166,7 @@ void test_cff_from_matrix() {
 
 void test_cff_copy() {
     printf("Testing cff_copy...\n");
-    cff_t *cff = cff_alloc(2,6,6);
+    cff_t *cff = cff_alloc(2, 6, 6);
     for (int i = 0; i < 6; i++)
     {
         cff_set_value(cff, i, i, 1);
