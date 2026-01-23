@@ -5,30 +5,6 @@
 #include <stddef.h>
 #include <string.h>
 
-void optKroneckerShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Optimized Kronecker");
-}
-
-void optKroneckerLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "OKr(%hd,%hd,%hd)", consParams[0], consParams[1], consParams[2]);
-}
-
-void optKroneckerConstructCFF(int d, int t)
-{
-    cff_t* inner = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[0]);
-    cff_t* bottom = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[1]);
-    cff_t* outter = cff_table_get_by_t(d-1, global_tables_array[d-1]->array[t].consParams[2]);
-    global_tables_array[d-1]->array[t].cff = cff_optimized_kronecker(outter, inner, bottom);
-}
-
-CFF_Construction_And_Name_Functions optKroneckerConstructionFunctions = {
-    .shortSrcFormatter = optKroneckerShortSrcFormatter,
-    .longSrcFormatter = optKroneckerLongSrcFormatter,
-    .constructionFunction = optKroneckerConstructCFF
-};
-
 cff_t* cff_optimized_kronecker
 (
     const cff_t* kronecker_outer, // (d-1)-CFF(s,  n2)
@@ -105,7 +81,7 @@ cff_t* cff_optimized_kronecker
 void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d)
 {
     int t, s;
-    unsigned long long n;
+    long long n;
     for (int t1 = cff_d; t1 < table->numCFFs - 1; t1++)
     {
         for (int t2 = t1; t2 < table->numCFFs; t2++)
@@ -117,12 +93,12 @@ void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int 
                 break;
             }
             n = table->array[t1].n + table->array[t2].n;
-            updateTable(table, t, n, &addConstructionFunctions, t1, t2, 0, 0, 0);
+            updateTable(table, t, n, CFF_CONSTRUCTION_ID_ADDITIVE, t1, t2, 0, 0, 0);
 
             // kronecker product
             t = t1 * t2;
             n = table->array[t1].n * table->array[t2].n;
-            updateTable(table, t, n, &kroneckerConstructionFunctions, t1, t2, 0, 0, 0);
+            updateTable(table, t, n, CFF_CONSTRUCTION_ID_KRONECKER, t1, t2, 0, 0, 0);
 
             // try optimized kronecker in both combinations (t1,t2) & (t2,t1)
             s = binarySearchTable(d_minus_one_table, table->array[t2].n);
@@ -130,7 +106,7 @@ void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int 
             {
                 t = (s * t1) + t2;
                 n = table->array[t1].n * table->array[t2].n;
-                updateTable(table, t, n, &optKroneckerConstructionFunctions, t1, t2, s, 0, 0);
+                updateTable(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t1, t2, s, 0, 0);
             }
             // try the other way for opt kronecker
             s = binarySearchTable(d_minus_one_table, table->array[t1].n);
@@ -138,7 +114,7 @@ void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int 
             {
                 t = (s * t2) + t1;
                 n = table->array[t1].n * table->array[t2].n;
-                updateTable(table, t, n, &optKroneckerConstructionFunctions, t2, t1, s, 0, 0);
+                updateTable(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t2, t1, s, 0, 0);
             }
         }
     }

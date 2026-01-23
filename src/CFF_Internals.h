@@ -10,31 +10,16 @@ struct cff
 {
     int d;
     int t;
-    int n;
+    long long n;
     int stride_bits; // helper for faster memory access
     uint8_t *matrix;
 };
 
-extern unsigned d_max;
-extern unsigned t_max;
-extern unsigned long long n_max;
-
-typedef void (*TableSourceShortSrcFormatter)(char*);
-typedef void (*TableSourceLongSrcFormatter)(short*, char*);
-typedef void (*ConstructionFunction)(int, int);
-
 typedef struct
 {
-    TableSourceShortSrcFormatter shortSrcFormatter;
-    TableSourceLongSrcFormatter longSrcFormatter;
-    ConstructionFunction constructionFunction;
-} CFF_Construction_And_Name_Functions;
-
-typedef struct
-{
-    unsigned long long n;
+    long long n;
     short consParams[5];
-    CFF_Construction_And_Name_Functions *functions;
+    short constructionID;
     cff_t *cff;
 } CFF_Table_Row;
 
@@ -43,12 +28,18 @@ typedef struct
     bool hasBeenChanged;
     int d;
     int numCFFs;
+    long long n_max; //need to store on each table because
+                      //its accessed in updateTable
     CFF_Table_Row *array; //an array of length numCFFs + 1
 } CFF_Table;
 
-
-// an array of pointers to tables
-extern CFF_Table **global_tables_array;
+struct cff_table_ctx
+{
+    int d_max;
+    int t_max;
+    long long n_max;
+    CFF_Table **tables_array;
+};
 
 unsigned long long choose(int n, int k);
 
@@ -67,14 +58,14 @@ int ipow(int base, int exp);
 void prime_power_sieve(int n, bool prime_array[n], bool prime_power_array[n]);
 
 // helper to search table for some row with a cff with at least n columns
-int binarySearchTable(CFF_Table *table, unsigned long long n);
+int binarySearchTable(CFF_Table *table, long long n);
 
 // called in loops to check constructions to update table with newly found CFFs
 void updateTable(
     CFF_Table *table,
     int t,
-    unsigned long long n,
-    CFF_Construction_And_Name_Functions *cffFunctions,
+    long long n,
+    int constructionID,
     int consParam0,
     int consParam1,
     int consParam2,

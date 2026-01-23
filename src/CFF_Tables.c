@@ -8,32 +8,99 @@
 
 #include "constructions/construction_internals.h"
 
-unsigned t_max;
-unsigned d_max;
-unsigned long long n_max;
-CFF_Table **global_tables_array; //an array of pointers of size d_max
-
-cff_t* cff_table_get_by_t(int d, int t)
+cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
 {
-    if (global_tables_array[d-1]->array[t].cff == NULL)
+    cff_t *cff;
+    if (ctx->tables_array[d-1]->array[t].cff == NULL)
     {
-        global_tables_array[d-1]->array[t].functions->constructionFunction(d, t);
+        switch (ctx->tables_array[d-1]->array[t].constructionID)
+        {
+        case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
+            cff = cff_identity(t, d);
+            break;
+        case CFF_CONSTRUCTION_ID_SPERNER:
+            cff = cff_sperner((int) ctx->tables_array[d-1]->array[t].n);
+            break;
+        case CFF_CONSTRUCTION_ID_STS:
+            cff = cff_sts(t);
+            break;
+        case CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD:
+            cff = cff_porat_rothschild(
+                ctx->tables_array[d-1]->array[t].consParams[0],
+                ctx->tables_array[d-1]->array[t].consParams[1],
+                ctx->tables_array[d-1]->array[t].consParams[2],
+                ctx->tables_array[d-1]->array[t].consParams[3],
+                ctx->tables_array[d-1]->array[t].consParams[4]
+            );
+            break;
+        case CFF_CONSTRUCTION_ID_REED_SOLOMON:
+            cff = cff_reed_solomon(
+                ctx->tables_array[d-1]->array[t].consParams[0],
+                ctx->tables_array[d-1]->array[t].consParams[1],
+                ctx->tables_array[d-1]->array[t].consParams[2],
+                ctx->tables_array[d-1]->array[t].consParams[3]
+            );
+            break;
+        case CFF_CONSTRUCTION_ID_SHORT_REED_SOLOMON:
+            cff = cff_short_reed_solomon(
+                ctx->tables_array[d-1]->array[t].consParams[0],
+                ctx->tables_array[d-1]->array[t].consParams[1],
+                ctx->tables_array[d-1]->array[t].consParams[2],
+                ctx->tables_array[d-1]->array[t].consParams[3],
+                ctx->tables_array[d-1]->array[t].consParams[4]
+            );
+            break;
+        case CFF_CONSTRUCTION_ID_FIXED_CFF:
+            cff = cff_identity(t, d);
+            break;
+        case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
+            // this can be improved a lot by checking how many ext by ones it will do in advance, then
+            // just doing an additive with a certain size in matrix
+            cff_t *to_extend = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
+            cff = cff_extend_by_one(to_extend);
+            break;
+        case CFF_CONSTRUCTION_ID_ADDITIVE:
+            cff_t *right_k = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
+            cff_t *left_k = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
+            cff = cff_additive(left_k, right_k);
+            break;
+        case CFF_CONSTRUCTION_ID_DOUBLING:
+            cff_t *smallerCFF = cff_table_get_by_t(ctx, 2, ctx->tables_array[1]->array[t].consParams[0]);
+            cff = cff_doubling(smallerCFF, ctx->tables_array[1]->array[t].consParams[1]);
+            break;
+        case CFF_CONSTRUCTION_ID_KRONECKER:
+            cff_t *left = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
+            cff_t *right = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
+            cff = cff_kronecker(left, right);
+            break;
+        case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER:
+            cff_t* inner = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0]);
+            cff_t* bottom = cff_table_get_by_t(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1]);
+            cff_t* outer = cff_table_get_by_t(ctx, d-1, ctx->tables_array[d-1]->array[t].consParams[2]);
+            cff = cff_optimized_kronecker(outer, inner, bottom);
+            break;
+        default:
+            break;
+        }
+        ctx->tables_array[d-1]->array[t].cff = cff;
+    } else
+    {
+        cff = ctx->tables_array[d-1]->array[t].cff;
     }
-    return global_tables_array[d-1]->array[t].cff;
+    return cff;
 }
 
-cff_t* cff_table_get_by_n(int d, int n)
+cff_t* cff_table_get_by_n(cff_table_ctx_t *ctx, int d, int n)
 {
-    int t = binarySearchTable(global_tables_array[d-1], n);
-    return cff_table_get_by_t(d, t);
+    int t = binarySearchTable(ctx->tables_array[d-1], n);
+    return cff_table_get_by_t(ctx, d, t);
 }
 
 inline __attribute__((always_inline)) void updateTable(
-//void updateTable(
     CFF_Table *table,
     int t,
-    unsigned long long n,
-    CFF_Construction_And_Name_Functions *cffFunctions,
+    long long n,
+    int constructionID,
     int consParam0,
     int consParam1,
     int consParam2,
@@ -42,12 +109,12 @@ inline __attribute__((always_inline)) void updateTable(
 )
 {
     // if t fits, and the n the n is better: (it should go in the table)
-    if ((t < table->numCFFs) && (n > table->array[t].n) && table->array[t].n != n_max)
+    if ((t < table->numCFFs) && (n > table->array[t].n) && table->array[t].n != table->n_max)
     {
         // edge case for when the cff is bigger than n_max
-        if ((n >= n_max))
+        if ((n >= table->n_max))
         {
-            table->array[t].n = n_max;
+            table->array[t].n = table->n_max;
             table->numCFFs = t+1;
         }
         else
@@ -59,12 +126,12 @@ inline __attribute__((always_inline)) void updateTable(
         table->array[t].consParams[2] = (short) consParam2;
         table->array[t].consParams[3] = (short) consParam3;
         table->array[t].consParams[4] = (short) consParam4;
-        table->array[t].functions = cffFunctions;
+        table->array[t].constructionID = (short) constructionID;
         table->hasBeenChanged = true;
     }
 }
 
-int binarySearchTable(CFF_Table *table, unsigned long long n) {
+int binarySearchTable(CFF_Table *table, long long n) {
     int low = 0;
     int high = table->numCFFs - 1;
 
@@ -92,7 +159,7 @@ int binarySearchTable(CFF_Table *table, unsigned long long n) {
 }
 
 // helper used in makeTables()
-CFF_Table* initializeTable(int numCFFs, int cff_d)
+CFF_Table* initializeTable(int numCFFs, int cff_d, long long n_max)
 {
     CFF_Table *table = malloc(sizeof(CFF_Table));
     if (table == NULL)
@@ -103,6 +170,7 @@ CFF_Table* initializeTable(int numCFFs, int cff_d)
     table->hasBeenChanged = false;
     table->numCFFs = numCFFs;
     table->d = cff_d;
+    table->n_max = n_max;
     // allocate space for the t=0 cff because this array should be indexed starting at 1
     table->array = malloc(sizeof(CFF_Table_Row)*(table->numCFFs+1));
     if (table->array == NULL)
@@ -119,7 +187,7 @@ CFF_Table* initializeTable(int numCFFs, int cff_d)
         table->array[t].consParams[2] = 0;
         table->array[t].consParams[3] = 0;
         table->array[t].consParams[4] = 0;
-        table->array[t].functions = &idConstructionFunctions;
+        table->array[t].constructionID = (short) CFF_CONSTRUCTION_ID_IDENTITY_MATRIX;
         table->array[t].cff = NULL;
     }
     return table;
@@ -128,86 +196,87 @@ CFF_Table* initializeTable(int numCFFs, int cff_d)
 // helper used in makeTables()
 CFF_Table* makeSpernerTable()
 {
-    CFF_Table *table = initializeTable(67, 1);
+    CFF_Table *table = initializeTable(67, 1, 0);
     for (int t = 4; t <= table->numCFFs; t++)
     {
         table->array[t].n = choose(t, t/2);
         table->array[t].consParams[0] = t;
-        table->array[t].functions = &spernerConstructionFunctions;
+        table->array[t].constructionID = (short) CFF_CONSTRUCTION_ID_SPERNER;
     }
     return table;
 }
 
-void cff_table_create(unsigned d_maximum, unsigned t_maximum, unsigned long long n_maximum, bool printLoops, bool useBinConstWeightCodes)
+cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maximum, bool printLoops, bool useBinConstWeightCodes)
 {
-    // set globals for table bounds
-    d_max = d_maximum;
-    t_max = t_maximum;
-    n_max = n_maximum;
-
     // save memory:
-    if (t_max > n_max)
+    if (t_maximum > n_maximum)
     {
-        t_max = n_max;
+        t_maximum = n_maximum;
     }
 
+    // set globals for table bounds
+    cff_table_ctx_t *ctx = malloc(sizeof(cff_table_ctx_t));
+    ctx->d_max = d_maximum;
+    ctx->t_max = t_maximum;
+    ctx->n_max = n_maximum;
+
     // create an array of booleans to determine if numbers are prime/primepowers
-    bool *prime_power_array = malloc(sizeof(bool)*t_max + 1);
-    bool *prime_array = malloc(sizeof(bool)*t_max + 1);
-    prime_power_sieve(t_max, prime_array, prime_power_array);
+    bool *prime_power_array = malloc(sizeof(bool)*t_maximum + 1);
+    bool *prime_array = malloc(sizeof(bool)*t_maximum + 1);
+    prime_power_sieve(t_maximum, prime_array, prime_power_array);
 
     // each table is stored in this array of pointers to structs, where each struct is one table
-    CFF_Table **table_array = malloc(sizeof(CFF_Table*) * d_max);
     //CFF_Table* table_array[d_max];
-    global_tables_array = table_array;
+    ctx->tables_array = malloc(sizeof(CFF_Table*) * d_maximum);
 
     // best 1-CFFs are sperner systems
-    table_array[0] = makeSpernerTable();
+    ctx->tables_array[0] = makeSpernerTable();
     if (printLoops) printf("Finished d=1 table\n");
 
     // 2-CFFs have more constructions, so handle it seperately
     int c = 0;
-    if (d_max > 1)
+    if (d_maximum > 1)
     {
-        table_array[1] = initializeTable(t_max+1, 2);
+        ctx->tables_array[1] = initializeTable(t_maximum+1, 2, n_maximum);
         if (useBinConstWeightCodes)
         {
-            addSurveyCFFs(table_array[1]);
+            addSurveyCFFs(ctx->tables_array[1]);
         }
-        addSTS(table_array[1]);
-        addReedSolomonCodes(table_array[1], 2, prime_array);
-        addPoratCodes(table_array[1], 2, prime_power_array);
-        table_array[1]->hasBeenChanged = true;
-        while(table_array[1]->hasBeenChanged)
+        addSTS(ctx->tables_array[1], t_maximum);
+        addReedSolomonCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
+        addPoratCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
+        ctx->tables_array[1]->hasBeenChanged = true;
+        while(ctx->tables_array[1]->hasBeenChanged)
         {
             c++;
-            table_array[1]->hasBeenChanged = false;
-            doublingConstructionFiller(table_array[1], table_array[0]);
-            extendByOneConstructionFiller(table_array[1], 2);
-            applyPairConstructions(table_array[1], table_array[0], 2);
+            ctx->tables_array[1]->hasBeenChanged = false;
+            doublingConstructionFiller(ctx->tables_array[1], ctx->tables_array[0]);
+            extendByOneConstructionFiller(ctx->tables_array[1], 2);
+            applyPairConstructions(ctx->tables_array[1], ctx->tables_array[0], 2);
         }
         if (printLoops) printf("looped %d times for d=2\n", c);
     }
 
     //tables for d=3 ... d_max
-    for (unsigned cff_d = 3; cff_d < d_max+1; cff_d++)
+    for (int cff_d = 3; cff_d < d_maximum+1; cff_d++)
     {
-        table_array[cff_d-1] = initializeTable(t_max+1, cff_d);
-        addReedSolomonCodes(table_array[cff_d-1], cff_d, prime_array);
-        addPoratCodes(table_array[cff_d-1], cff_d, prime_power_array);
-        table_array[cff_d-1]->hasBeenChanged = true;
+        ctx->tables_array[cff_d-1] = initializeTable(t_maximum+1, cff_d, n_maximum);
+        addReedSolomonCodes(ctx->tables_array[cff_d-1], cff_d, t_maximum, prime_array);
+        addPoratCodes(ctx->tables_array[cff_d-1], cff_d, t_maximum, prime_array);
+        ctx->tables_array[cff_d-1]->hasBeenChanged = true;
         c = 0;
-        while(table_array[cff_d-1]->hasBeenChanged)
+        while(ctx->tables_array[cff_d-1]->hasBeenChanged)
         {
             c++;
-            table_array[cff_d-1]->hasBeenChanged = false;
-            extendByOneConstructionFiller(table_array[cff_d-1], cff_d);
-            applyPairConstructions(table_array[cff_d-1], table_array[cff_d-2], cff_d);
+            ctx->tables_array[cff_d-1]->hasBeenChanged = false;
+            extendByOneConstructionFiller(ctx->tables_array[cff_d-1], cff_d);
+            applyPairConstructions(ctx->tables_array[cff_d-1], ctx->tables_array[cff_d-2], cff_d);
         }
         if (printLoops) printf("looped %d times for d=%d\n", c, cff_d);
     }
     free(prime_array);
     free(prime_power_array);
+    return ctx;
 }
 
 // helper used in freeGlobalTableArray()
@@ -221,35 +290,129 @@ void freeTable(CFF_Table *table)
     free(table);
 }
 
-void cff_table_free()
+void cff_table_free(cff_table_ctx_t *ctx)
 {
-    for (unsigned d = 0; d < d_max; d++)
+    for (int d = 0; d < ctx->d_max; d++)
     {
-        freeTable(global_tables_array[d]);
+        freeTable(ctx->tables_array[d]);
     }
-    free(global_tables_array);
+    free(ctx);
 }
 
-void cff_table_write_csv()
+void cff_table_short_name(cff_table_ctx_t *ctx, int d, int t, char *str_buffer)
 {
-    for (unsigned i = 0; i < d_max; i++)
+    switch (ctx->tables_array[d]->array[t].constructionID)
     {
-        char filename[100];
+    case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
+        strcpy(str_buffer, "ID");
+        break;
+    case CFF_CONSTRUCTION_ID_SPERNER:
+        strcpy(str_buffer, "Sperner");
+        break;
+    case CFF_CONSTRUCTION_ID_STS:
+        strcpy(str_buffer, "STS");
+        break;
+    case CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD:
+        strcpy(str_buffer, "Porat and Rothschild");
+        break;
+    case CFF_CONSTRUCTION_ID_REED_SOLOMON:
+        strcpy(str_buffer, "Reed-Solomon");
+        break;
+    case CFF_CONSTRUCTION_ID_SHORT_REED_SOLOMON:
+        strcpy(str_buffer, "Shortened Reed-Solomon");
+        break;
+    case CFF_CONSTRUCTION_ID_FIXED_CFF:
+        strcpy(str_buffer, "Constant-weight binary code");
+        break;
+    case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
+        strcpy(str_buffer, "Extension by one");
+        break;
+    case CFF_CONSTRUCTION_ID_ADDITIVE:
+        strcpy(str_buffer, "Additive");
+        break;
+    case CFF_CONSTRUCTION_ID_DOUBLING:
+        strcpy(str_buffer, "Doubling");
+        break;
+    case CFF_CONSTRUCTION_ID_KRONECKER:
+        strcpy(str_buffer, "Kronecker");
+        break;
+    case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER:
+        strcpy(str_buffer, "Optimized Kronecker");
+        break;
+    default:
+        break;
+    }
+}
+
+void cff_table_long_name(cff_table_ctx_t *ctx, int d, int t, char *str_buffer)
+{
+    short *consParams = ctx->tables_array[d]->array[t].consParams;
+    switch (ctx->tables_array[d]->array[t].constructionID)
+    {
+    case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
+        sprintf(str_buffer, "ID(%hd)", consParams[0]);
+        break;
+    case CFF_CONSTRUCTION_ID_SPERNER:
+        sprintf(str_buffer, "Sp(%hd)", consParams[0]);
+        break;
+    case CFF_CONSTRUCTION_ID_STS:
+        sprintf(str_buffer, "STS(%hd)", consParams[0]);
+        break;
+    case CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD:
+        sprintf(str_buffer, "PR(%hd;%hd;%hd;%hd)", consParams[0], consParams[1], consParams[2], consParams[3]);
+        break;
+    case CFF_CONSTRUCTION_ID_REED_SOLOMON:
+        sprintf(str_buffer, "RS(%hd^%hd;%hd;%hd)", consParams[0], consParams[1], consParams[2], consParams[3]);
+        break;
+    case CFF_CONSTRUCTION_ID_SHORT_REED_SOLOMON:
+        sprintf(str_buffer, "SRS(%hd;%hd;%hd;%hd;%hd)", consParams[0], consParams[1], consParams[2], consParams[3], consParams[4]);
+        break;
+    case CFF_CONSTRUCTION_ID_FIXED_CFF:
+        sprintf(str_buffer, "Survey CFF %hd", consParams[0]);
+        break;
+    case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
+        sprintf(str_buffer, "Extension by one of %hd", consParams[0]);
+        break;
+    case CFF_CONSTRUCTION_ID_ADDITIVE:
+        sprintf(str_buffer, "Add(%hd;%hd)", consParams[0], consParams[1]);
+        break;
+    case CFF_CONSTRUCTION_ID_DOUBLING:
+        sprintf(str_buffer, "Dbl(%hd;%hd)", consParams[0], consParams[1]);
+        break;
+    case CFF_CONSTRUCTION_ID_KRONECKER:
+        sprintf(str_buffer, "Kr(%hd;%hd)", consParams[0], consParams[1]);
+        break;
+    case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER:
+        sprintf(str_buffer, "OKr(%hd;%hd;%hd)", consParams[0], consParams[1], consParams[2]);
+        break;
+    default:
+        break;
+    }
+}
+
+
+void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path)
+{
+    for (int i = 0; i < ctx->d_max; i++)
+    {
+        char filename[500];
         char shortSrc[100];
         char longSrc[100];
         FILE *fptr = NULL;
-        sprintf(filename, "./tables/d_%d.csv", global_tables_array[i]->d);
+        sprintf(filename, "%s/d_%d.csv", folder_path, ctx->tables_array[i]->d);
         fptr = fopen(filename, "w");
         fprintf(fptr, "t,n,short source,long source");
-        for (int t = 0; t < global_tables_array[i]->numCFFs; t++)
+        for (int t = 0; t < ctx->tables_array[i]->numCFFs; t++)
         {
-            global_tables_array[i]->array[t].functions->shortSrcFormatter(shortSrc);
-            global_tables_array[i]->array[t].functions->longSrcFormatter(global_tables_array[i]->array[t].consParams, longSrc);
+            //ctx->tables_array[i]->array[t].functions->shortSrcFormatter(shortSrc);
+            //ctx->tables_array[i]->array[t].functions->longSrcFormatter(ctx->tables_array[i]->array[t].consParams, longSrc);
+            cff_table_short_name(ctx, i, t, shortSrc);
+            cff_table_long_name(ctx, i, t, longSrc);
             fprintf(
                 fptr,
                 "\n%d, %llu, %s, %s",
                 t,
-                global_tables_array[i]->array[t].n,
+                ctx->tables_array[i]->array[t].n,
                 shortSrc,
                 longSrc
             );

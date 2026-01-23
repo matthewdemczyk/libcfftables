@@ -1,7 +1,6 @@
 #include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
 
-#include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <math.h>
@@ -12,44 +11,18 @@
 #include "finite_fields_wrapper.h"
 
 
-void rsShortSrcFormatter(char *strBuffer)
+void addReedSolomonCodes(CFF_Table *table, int cff_d, int t_max, bool *prime_array)
 {
-    strcpy(strBuffer, "Reed-Solomon");
-}
-
-void rsLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "RS(%hd^%hd,%hd,%hd)", consParams[0], consParams[1], consParams[2], consParams[3]);
-}
-
-void rsConstructCFF(int d, int t)
-{
-    global_tables_array[d-1]->array[t].cff = cff_reed_solomon(
-        global_tables_array[d-1]->array[t].consParams[0],
-        global_tables_array[d-1]->array[t].consParams[1],
-        global_tables_array[d-1]->array[t].consParams[2],
-        global_tables_array[d-1]->array[t].consParams[3]
-    );
-}
-
-CFF_Construction_And_Name_Functions rsConstructionFunctions = {
-    .shortSrcFormatter = rsShortSrcFormatter,
-    .longSrcFormatter = rsLongSrcFormatter,
-    .constructionFunction = rsConstructCFF
-};
-
-void addReedSolomonCodes(CFF_Table *table, int cff_d, bool prime_array[])
-{
-    unsigned long long cff_n;
+    long long cff_n;
     long long q;
-    short m, short_m, short_k, exp;
+    short m, short_m, short_k, e;
     int cff_t;
     for (short p = 2; (unsigned) p <= ceil(sqrt(t_max)); p++) //loop over q
     {
         if (prime_array[p])
         {
             q = p;
-            exp = 1;
+            e = 1;
             while (q <= t_max)
             {
                 for (int k = 2; k < q + 1; k++)
@@ -62,18 +35,18 @@ void addReedSolomonCodes(CFF_Table *table, int cff_d, bool prime_array[])
                     cff_t = m * q;
                     if (cff_t < 0) break; //this means overflow happened in above line
                     cff_n = pow(q, k);
-                    updateTable(table, cff_t, cff_n, &rsConstructionFunctions, p, exp, k, m, 0);
+                    updateTable(table, cff_t, cff_n, CFF_CONSTRUCTION_ID_REED_SOLOMON, p, e, k, m, 0);
                     for (int s = 1; s + 1 <= q && s < m && s < k; s++)
                     {
                         short_m = m - s;
                         short_k = k - s;
                         cff_t = short_m * q;
                         cff_n = pow(q, short_k);
-                        updateTable(table, cff_t, cff_n, &shortRsConstructionFunctions, p, exp, k, m, s);
+                        updateTable(table, cff_t, cff_n, CFF_CONSTRUCTION_ID_SHORT_REED_SOLOMON, p, e, k, m, s);
                     }
                 }
                 q *= p;
-                exp++;
+                e++;
             }
         }
     }

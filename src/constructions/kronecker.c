@@ -14,19 +14,6 @@ void kroneckerLongSrcFormatter(short *consParams, char *strBuffer)
     sprintf(strBuffer, "Kr(%hd,%hd)", consParams[0], consParams[1]);
 }
 
-void kroneckerConstructCFF(int d, int t)
-{
-    cff_t *right = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[0]);
-    cff_t *left = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[1]);
-    global_tables_array[d-1]->array[t].cff = cff_kronecker(left, right);
-}
-
-CFF_Construction_And_Name_Functions kroneckerConstructionFunctions = {
-    .shortSrcFormatter = kroneckerShortSrcFormatter,
-    .longSrcFormatter = kroneckerLongSrcFormatter,
-    .constructionFunction = kroneckerConstructCFF
-};
-
 cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
 {
     // Verify if the cffs' parameters are valid

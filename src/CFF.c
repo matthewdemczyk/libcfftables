@@ -12,7 +12,7 @@
 #define CFF_VERIFY_VERBOSE_PRINTOUT false
 
 // allocates a d-CFF(t,n) filled with 0s
-cff_t* cff_alloc(int d, int t, int n)
+cff_t* cff_alloc(int d, int t, long long n)
 {
     cff_t* c = malloc(sizeof(cff_t));
     c->d = d;
@@ -72,9 +72,9 @@ int cff_get_value(const cff_t *cff, int r, int c)
 
 // allocates memory for a d-CFF(t,n), sets its matrix to the passed matrix, then returns a pointer to it
 // make sure to free the memory using cff_free() when finished with the CFF.
-cff_t* cff_from_matrix(int d, int t, int n, const int *matrix)
+cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix)
 {
-    cff_t *cff = cff_alloc(d,t,n);
+    cff_t *cff = cff_alloc(d, t, n);
     for(int r  = 0; r < t; r++)
     {
         for(int c  = 0; c < n; c++)
@@ -108,7 +108,7 @@ cff_t* cff_copy(const cff_t *src)
 // prints a CFF to console
 void cff_print(const cff_t *cff)
 {
-    printf("%d-CFF(%d,%d):\n", cff->d, cff->t, cff->n);
+    printf("%u-CFF(%u,%llu):\n", cff->d, cff->t, cff->n);
     int value;
     for(int r = 0; r < cff->t; r++)
     {
@@ -172,7 +172,7 @@ bool cff_verify(const cff_t *cff)
             printf("Testing cols:  ");
             for (int x = 0; x < k; x++)
             {
-                printf("%d  ", cols[x]);
+                printf("%u  ", cols[x]);
             }
             printf("| ID Matrix found on rows:  ");
         }
@@ -205,9 +205,9 @@ bool cff_verify(const cff_t *cff)
             // check if the row was the first identity row for its column with a 1
             if (s == 1 && v[e] == -1)
             {
-                if (CFF_VERIFY_VERBOSE_PRINTOUT) { printf("%d  ", r); }
+                if (CFF_VERIFY_VERBOSE_PRINTOUT) { printf("%u  ", r); }
                 // record that c's identity row exists (by saving the row index)
-                v[e] = r;
+                v[e] = (int) r;
                 f++;
                 if (f == k)
                 { // exit early if all identity rows are found

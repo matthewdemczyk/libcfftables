@@ -9,34 +9,10 @@
 #include "../CFF_Internals.h"
 
 
-void doublingShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Doubling");
-}
-
-void doublingLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "Dbl(%hd,%hd)", consParams[0], consParams[1]);
-}
-
-void doublingConstructCFF(int d, int t)
-{
-    // mutually recursive call to get the 1-CFF needed
-    cff_t *smallerCFF = cff_table_get_by_t(2, global_tables_array[1]->array[t].consParams[0]);
-    // call the construction and assign the cff's pointer to the table
-    global_tables_array[d-1]->array[t].cff = cff_doubling(smallerCFF, global_tables_array[1]->array[t].consParams[1]);
-}
-
-CFF_Construction_And_Name_Functions doublingConstructionFunctions = {
-    .shortSrcFormatter = doublingShortSrcFormatter,
-    .longSrcFormatter = doublingLongSrcFormatter,
-    .constructionFunction = doublingConstructCFF
-};
-
 // the function to fill in a table with the doubling construction parameters
 void doublingConstructionFiller(CFF_Table *table_2, CFF_Table *table_1)
 {
-    unsigned long long n;
+    long long n;
     int s;
     for (int t = 2; t < table_2->numCFFs; t++)
     {
@@ -44,7 +20,7 @@ void doublingConstructionFiller(CFF_Table *table_2, CFF_Table *table_1)
         s = binarySearchTable(table_1, n);
         if (s != -1)
         {
-            updateTable(table_2, t + s + 2 - (s % 2), 2 * n, &doublingConstructionFunctions, t, s, 0, 0, 0);
+            updateTable(table_2, t + s + 2 - (s % 2), 2 * n, CFF_CONSTRUCTION_ID_DOUBLING, t, s, 0, 0, 0);
         }
     }
 }

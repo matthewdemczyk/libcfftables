@@ -1,7 +1,6 @@
 #include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
 
-#include <string.h>
 #include <math.h>
 #include <float.h>
 #include <stdlib.h>
@@ -9,23 +8,6 @@
 #include "../CFF_Internals.h"
 #include "finite_fields_wrapper.h"
 
-
-void poratShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Porat and Rothschild");
-}
-
-void poratLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "PR(%hd,%hd,%hd,%hd)", consParams[0], consParams[1], consParams[2], consParams[3]);
-}
-
-void poratConstructCFF(int d, int t)
-{
-    // this function is not implemented since porat doesn't appear in any tables until
-    // n is larger than unsigned long long max value (so this function will never be called)
-    global_tables_array[d-1]->array[t].cff = cff_identity(t, d);
-}
 
 // will be returned, completely filled, by the porat construction
 typedef struct GeneratorMatrixStruct {
@@ -76,35 +58,32 @@ double poratEntropyFunction(double q, double r)
     );
 }
 
-CFF_Construction_And_Name_Functions poratConstructionFunctions = {
-    .shortSrcFormatter = poratShortSrcFormatter,
-    .longSrcFormatter = poratLongSrcFormatter,
-    .constructionFunction = poratConstructCFF
-};
-
-void addPoratCodes(CFF_Table* table, int cff_d, bool* prime_power_array)
+void addPoratCodes(CFF_Table* table, int cff_d, int t_max, bool* prime_array)
 {
-    unsigned long long cff_n;
-    unsigned cff_t, r, k, m;
+    long long cff_n;
+    int cff_t, r, k, m;
     double Hq;
     r = cff_d + 1;
-    for (unsigned q = 2 * r; q < 4 * r && q < t_max; q++)
+    for (int p = 2; p < 4 * r && p < t_max; p++)
     {
-        if (prime_power_array[q])
+        if (prime_array[p])
         {
-            k = 1;
-            cff_n = q;
-            Hq = poratEntropyFunction((double) q, (double) r);
-            m = ceil( ((double) (k)) / (1.0 - Hq) );
-            cff_t = m * q;
-            while (cff_t <= t_max && cff_n != 0)
+            for (int e = 1, q = p; q >= 2 * r && q < 4 * r && q < t_max; e++, q *= p)
             {
-                updateTable(table, cff_t, cff_n, &poratConstructionFunctions, q,k,m,r,0);
-                // change array to test next
-                k++;
-                m = (unsigned) ceil( ((double) (k)) / (1.0 - Hq) );
-                cff_n = pow(q, k);
+                k = 1;
+                cff_n = q;
+                Hq = poratEntropyFunction((double) q, (double) r);
+                m = ceil( ((double) (k)) / (1.0 - Hq) );
                 cff_t = m * q;
+                while (cff_t <= t_max && cff_n != 0)
+                {
+                    updateTable(table, cff_t, cff_n, CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD, p,e,k,m,r);
+                    // change array to test next
+                    k++;
+                    m = (int) ceil( ((double) (k)) / (1.0 - Hq) );
+                    cff_n = pow(q, k);
+                    cff_t = m * q;
+                }
             }
         }
     }

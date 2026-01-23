@@ -2,41 +2,18 @@
 #include "../../include/libcfftables/libcfftables.h"
 
 #include <stdbool.h>
-#include <string.h>
 #include <stdlib.h>
 
 
-void stsShortSrcFormatter(char *strBuffer)
+void addSTS(CFF_Table *table, int t_max)
 {
-    strcpy(strBuffer, "STS");
-}
-
-void stsLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "STS(%hd)", consParams[0]);
-}
-
-void stsConstructCFF(int d, int t)
-{
-    (void) d; // suppress compiler warnings
-    global_tables_array[1]->array[t].cff = cff_sts(t);
-}
-
-CFF_Construction_And_Name_Functions stsConstructionFunctions = {
-    .shortSrcFormatter = stsShortSrcFormatter,
-    .longSrcFormatter = stsLongSrcFormatter,
-    .constructionFunction = stsConstructCFF
-};
-
-void addSTS(CFF_Table *table)
-{
-    unsigned long long n;
-    for (unsigned v = 2; v <= t_max; v++)
+    long long n;
+    for (int v = 2; v <= t_max; v++)
     {
         if (v % 6 == 3 || v % 6 == 1)
         {
             n = ((v * (v - 1)) / 6);
-            updateTable(table, v, n, &stsConstructionFunctions, v, 0, 0, 0,0);
+            updateTable(table, v, n, CFF_CONSTRUCTION_ID_STS, v, 0, 0, 0, 0);
         }
     }
 }

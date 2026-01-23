@@ -22,12 +22,12 @@ typedef struct cff_table_ctx cff_table_ctx_t;
  * ============================================================================ */
 
 // allocates a CFF filled with zeros (must be freed with cff_free)
-cff_t* cff_alloc(int d, int t, int n);
+cff_t* cff_alloc(int d, int t, long long n);
 // frees a CoverFreeFamily from memory
 void cff_free(cff_t *cff);
 
 // allocates a d-CFF(t,n) and sets its values from a 0-1 int matrix (must be freed with cff_free)
-cff_t* cff_from_matrix(int d, int t, int n, const int *matrix);
+cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix);
 
 // allocates and makes a copy of a cff (must be freed with cff_free)
 cff_t* cff_copy(const cff_t *src);
@@ -79,19 +79,19 @@ cff_t* cff_optimized_kronecker
  * ============================================================================ */
 
 // initializes global_tables_array (must be freed with freeGlobalTableArray)
-void cff_table_create(unsigned d_maximum, unsigned t_maximum, unsigned long long n_maximum, bool printLoops, bool useBinConstWeightCodes);
+cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maximum, bool printLoops, bool useBinConstWeightCodes);
 
 // frees global_tables_array's memory
-void cff_table_free();
+void cff_table_free(cff_table_ctx_t *ctx);
 
 // main recursive function to get a CFF after making the tables
-cff_t* cff_table_get_by_t(int d, int t);
+cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t);
 
 // uses getByT to get a cff
-cff_t* cff_table_get_by_n(int d, int n);
+cff_t* cff_table_get_by_n(cff_table_ctx_t *ctx, int d, int n);
 
 // makes csv files in ./tables/ from global_tables_array
-void cff_table_write_csv();
+void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path);
 
 
 #ifdef __cplusplus

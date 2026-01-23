@@ -1,32 +1,7 @@
 #include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
-
-#include <string.h>
-
 #include "../CFF_Internals.h"
-#include "construction_internals.h"
 
-
-void spernerShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Sperner");
-}
-
-void spernerLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "Sp(%hd)", consParams[0]);
-}
-
-void spernerConstructCFF(int d, int t)
-{
-    global_tables_array[d-1]->array[t].cff = cff_sperner((int) global_tables_array[d-1]->array[t].n);
-}
-
-CFF_Construction_And_Name_Functions spernerConstructionFunctions = {
-    .shortSrcFormatter = spernerShortSrcFormatter,
-    .longSrcFormatter = spernerLongSrcFormatter,
-    .constructionFunction = spernerConstructCFF
-};
 
 cff_t* cff_sperner(int n)
 {

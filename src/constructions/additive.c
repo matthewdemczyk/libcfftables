@@ -6,29 +6,6 @@
 #include <string.h>
 
 
-void addShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Additive");
-}
-
-void addLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "Add(%hd,%hd)", consParams[0], consParams[1]);
-}
-
-void addConstructCFF(int d, int t)
-{
-    cff_t *right = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[0]);
-    cff_t *left = cff_table_get_by_t(d, global_tables_array[d-1]->array[t].consParams[1]);
-    global_tables_array[d-1]->array[t].cff = cff_additive(left, right);
-}
-
-CFF_Construction_And_Name_Functions addConstructionFunctions = {
-    .shortSrcFormatter = addShortSrcFormatter,
-    .longSrcFormatter = addLongSrcFormatter,
-    .constructionFunction = addConstructCFF
-};
-
 cff_t* cff_additive(const cff_t *left, const cff_t *right)
 {
     cff_t *result = cff_alloc(

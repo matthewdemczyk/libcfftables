@@ -4,6 +4,7 @@
 # Build artifacts
 build/
 Testing/
+tables/
 
 # Don't commit the conda recipe
 conda-recipe/

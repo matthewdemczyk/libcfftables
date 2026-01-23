@@ -2,39 +2,11 @@
 #include "../../include/libcfftables/libcfftables.h"
 
 #include <stdbool.h>
-#include <string.h>
 #include <math.h>
 
 #include "../CFF_Internals.h"
 #include "finite_fields_wrapper.h"
 
-
-void shortRsShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Shortened Reed-Solomon");
-}
-
-void shortRsLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "SRS(%hd,%hd,%hd,%hd,%hd)", consParams[0], consParams[1], consParams[2], consParams[3], consParams[4]);
-}
-
-void shortRsConstructCFF(int d, int t)
-{
-        global_tables_array[d-1]->array[t].cff = cff_short_reed_solomon(
-        global_tables_array[d-1]->array[t].consParams[0],
-        global_tables_array[d-1]->array[t].consParams[1],
-        global_tables_array[d-1]->array[t].consParams[2],
-        global_tables_array[d-1]->array[t].consParams[3],
-        global_tables_array[d-1]->array[t].consParams[4]
-    );
-}
-
-CFF_Construction_And_Name_Functions shortRsConstructionFunctions = {
-    .shortSrcFormatter = shortRsShortSrcFormatter,
-    .longSrcFormatter = shortRsLongSrcFormatter,
-    .constructionFunction = shortRsConstructCFF
-};
 
 cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
 {
