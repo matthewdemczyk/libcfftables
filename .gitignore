@@ -1,4 +1,4 @@
-# macOS junk
+# macOS
 .DS_Store
 
 # Build artifacts
@@ -11,4 +11,3 @@ conda-recipe/
 
 # Local notes
 TODO
-tests/testingcommands.txt
