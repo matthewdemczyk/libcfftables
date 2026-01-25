@@ -22,6 +22,8 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCF
     cff_t *cff;
     if (ctx->tables_array[d-1]->array[t].cff == NULL)
     {
+        // setup this node in IntermediateCFFsList so itermediate CFFs
+        // can be freed once to final CFF is constructed
         IntermediateCFFsList *node = malloc(sizeof(IntermediateCFFsList));
         if (node == NULL)
         {   // handle malloc failure
@@ -38,6 +40,8 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCF
         node->t = t;
         node->next = *lst; //prepend node to linked list
         *lst = node;
+        // now: construct the CFF according to which construction this
+        // row of the table corresponds to
         switch (ctx->tables_array[d-1]->array[t].constructionID)
         {
         case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
@@ -267,21 +271,22 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
         t_maximum = n_maximum;
     }
 
-    // set globals for table bounds
+    // setup tables ctx
+    // the tables ctx stores an array of pointers to each table, and
+    // also stores the max d t and n allowed in the tables
     cff_table_ctx_t *ctx = malloc(sizeof(cff_table_ctx_t));
     ctx->d_max = d_maximum;
     ctx->t_max = t_maximum;
     ctx->n_max = n_maximum;
+    ctx->tables_array = malloc(sizeof(CFF_Table*) * d_maximum);
 
-    // create an array of booleans to determine if numbers are prime/primepowers
+    // create an array of booleans to determine if numbers are prime
     bool *prime_array = malloc(sizeof(bool)*t_maximum + 1);
     prime_power_sieve(t_maximum, prime_array);
 
     // each table is stored in this array of pointers to structs, where each struct is one table
-    //CFF_Table* table_array[d_max];
-    ctx->tables_array = malloc(sizeof(CFF_Table*) * d_maximum);
 
-    // best 1-CFFs are sperner systems
+    // best 1-CFFs are sperner systems, make these seperately
     ctx->tables_array[0] = makeSpernerTable();
     if (printLoops) printf("Finished d=1 table\n");
 
@@ -292,7 +297,7 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
         ctx->tables_array[1] = initializeTable(t_maximum+1, 2, n_maximum);
         if (useBinConstWeightCodes)
         {
-            addSurveyCFFs(ctx->tables_array[1]);
+            cff_table_add_fixed_cffs(ctx->tables_array[1]);
         }
         addSTS(ctx->tables_array[1], t_maximum);
         addReedSolomonCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
@@ -330,22 +335,17 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
     return ctx;
 }
 
-// helper used in freeGlobalTableArray()
-void freeTable(CFF_Table *table)
-{
-    for (int i = 0; i < table->numCFFs; i++)
-    {
-        cff_free(table->array[i].cff);
-    }
-    free(table->array);
-    free(table);
-}
-
 void cff_table_free(cff_table_ctx_t *ctx)
 {
     for (int d = 0; d < ctx->d_max; d++)
     {
-        freeTable(ctx->tables_array[d]);
+        CFF_Table *table = ctx->tables_array[d];
+        for (int i = 0; i < table->numCFFs; i++)
+        {
+            cff_free(table->array[i].cff);
+        }
+        free(table->array);
+        free(table);
     }
     free(ctx->tables_array);
     free(ctx);
@@ -444,7 +444,9 @@ void cff_table_long_name(cff_table_ctx_t *ctx, int d, int t, char *str_buffer)
     }
 }
 
-
+// writes the tables to csvs in folder_path
+// each table is called d_1.csv, d_2.csv, etc
+// the function will replace files if they were there before
 void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path)
 {
     for (int i = 0; i < ctx->d_max; i++)
