@@ -50,12 +50,105 @@ void test_cff_table()
     cff_table_free(ctx);
 }
 
+void test_cff_2_12()
+{
+    cff_t *cff = get_fixed_cff(2, 12);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_13()
+{
+    cff_t *cff = get_fixed_cff(2, 13);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_14()
+{
+    cff_t *cff = get_fixed_cff(2, 14);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_15()
+{
+    cff_t *cff = get_fixed_cff(2, 15);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_16()
+{
+    cff_t *cff = get_fixed_cff(2, 16);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_17()
+{
+    cff_t *cff = get_fixed_cff(2, 17);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_18()
+{
+    cff_t *cff = get_fixed_cff(2, 18);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_21()
+{
+    cff_t *cff = get_fixed_cff(2, 21);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_22()
+{
+    cff_t *cff = get_fixed_cff(2, 22);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
+void test_cff_2_23()
+{
+    cff_t *cff = get_fixed_cff(2, 23);
+    cff_print(cff);
+    assert(cff_verify(cff));
+    cff_free(cff);
+}
+
 int main()
 {
     test_cff_identity_1();
     test_cff_reed_solomon_1();
     test_cff_reed_solomon_2();
     test_cff_table();
+
+    test_cff_2_12();
+    test_cff_2_13();
+    test_cff_2_14();
+    test_cff_2_15();
+    test_cff_2_16();
+    test_cff_2_17();
+    test_cff_2_18();
+
+    test_cff_2_21();
+    test_cff_2_22();
+    test_cff_2_23();
+
     printf("\n✓ test_cff_direct_constructions tests passed!\n");
     return 0;
 }
