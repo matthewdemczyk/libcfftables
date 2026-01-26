@@ -6,4 +6,6 @@ cd build
 cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="--coverage"
 make
 ctest --output-on-failure
-gcovr -r .. --html --html-details -o coverage.html
+gcovr -r .. \
+    --filter '.*/src/.*\.c$' \
+    --html --html-details -o coverage.html
