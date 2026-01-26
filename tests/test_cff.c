@@ -3,12 +3,12 @@
 #include <libcfftables/libcfftables.h>
 
 /*
-    test ensures that allocating memory works, and
+    Test ensures that allocating memory works, and
     that cff_t has struct attributes set properly
 */
  void test_cff_alloc()
  {
-    printf("Testing cff_alloc...\n");
+    puts("Running test_cff_alloc...\n");
     cff_t *cff = cff_alloc(2, 10, 15);
     cff_print(cff);
     assert(cff_get_d(cff) == 2);
@@ -18,28 +18,28 @@
     cff_set_d(cff, 3);
     assert(cff_get_d(cff) == 3);
     cff_free(cff);
-    printf("✓ cff_alloc test passed\n");
+    puts("OK test_cff_alloc passed\n");
 }
 
 /*
-    ensure that cff_free does not try to
+    Ensure that cff_free does not try to
     access null pointers in a cff_t struct
 */
 void test_cff_null_free()
 {
-    printf("Testing cff_null_free...\n");
+    puts("Running test_cff_null_free...\n");
     cff_t *cff = NULL;
     cff_free(cff);
-    printf("✓ cff_null_free test passed\n");
+    puts("OK test_cff_null_free passed\n");
 }
 
 
 /*
-    test that cff_set_value and cff_get_value work
+    Test that cff_set_value and cff_get_value work
 */
 void test_cff_set_get()
 {
-    printf("Testing cff_set_get...\n");
+    puts("Running test_cff_set_get...\n");
     cff_t *cff = cff_alloc(2, 10, 10);
     cff_set_value(cff, 0, 0, 1);
     cff_print(cff);
@@ -47,22 +47,28 @@ void test_cff_set_get()
     //check other values are still zero
     assert(cff_get_value(cff, 1, 1) == 0);
     cff_free(cff);
-    printf("✓ cff_set_get test passed\n");
+    puts("OK test_cff_set_get passed\n");
 }
 
+/*
+    Tests that verifying an all zeros cff fails verification
+*/
 void test_cff_verify_1()
 {
-    printf("Testing cff_verify_1...\n");
+    puts("Running test_cff_verify_1...\n");
     cff_t *cff = cff_alloc(2, 10, 10);
     cff_print(cff);
     assert(cff_verify(cff) == false);
     cff_free(cff);
-    printf("✓ cff_verify_1 test passed\n");
+    puts("OK test_cff_verify_1 passed\n");
 }
 
+/*
+    Tests that a cff from a sperner system passes verification
+*/
 void test_cff_verify_2()
 {
-    printf("Testing cff_verify_2...\n");
+    puts("Running test_cff_verify_2...\n");
     cff_t *cff = cff_alloc(1, 4, 6);
     //set cff to sperner system for t=4
     cff_set_value(cff, 0, 0, 1);
@@ -83,12 +89,15 @@ void test_cff_verify_2()
     cff_print(cff);
     assert(cff_verify(cff));
     cff_free(cff);
-    printf("✓ cff_verify_2 test passed\n");
+    puts("OK test_cff_verify_2 passed\n");
 }
 
+/*
+    Test ensures that an all ones CFF fails verification
+*/
 void test_cff_verify_3()
 {
-    printf("Testing cff_verify_3...\n");
+    puts("Running test_cff_verify_3...\n");
     cff_t *cff = cff_alloc(2, 10, 10);
     for (int i = 0; i < 10; i++)
     {
@@ -100,23 +109,29 @@ void test_cff_verify_3()
     cff_print(cff);
     assert(cff_verify(cff) == false);
     cff_free(cff);
-    printf("✓ cff_verify_3 test passed\n");
+    puts("OK test_cff_verify_3 passed\n");
 }
 
-// Test the invalid parameter branch in cff_verify
+/*
+    Test the invalid parameter branch in cff_verify
+*/
 void test_cff_verify_4()
 {
-    printf("Testing cff_verify_4...\n");
+    puts("Running test_cff_verify_4...\n");
     cff_t *cff = cff_alloc(10, 5, 8); // d+1=11 > n=8
     assert(cff_verify(cff) == false);
     cff_free(cff);
-    printf("✓ cff_verify_invalid_params test passed\n");
+    puts("OK test_cff_verify_4 passed\n");
 }
 
-// Test boundary: d+1 exactly equals n
-void test_cff_verify_5()
+/*
+    Tests boundary: d+1 exactly equals n in CFF verify
+    this is testing with an ID matrix so it should pass
+    verification
+*/
+    void test_cff_verify_5()
 {
-    printf("Testing cff_verify boundary case...\n");
+    puts("Running test_cff_verify_5...\n");
     cff_t *cff = cff_alloc(2, 4, 3); // d+1 = n
     // Create a minimal valid 2-CFF(4,3)
     for (int i = 0; i < 3; i++)
@@ -125,11 +140,16 @@ void test_cff_verify_5()
     }
     assert(cff_verify(cff) == true);
     cff_free(cff);
-    printf("✓ cff_verify_boundary test passed\n");
+    puts("OK test_cff_verify_5 passed\n");
 }
 
+/*
+    Tests that a CFF from a matrix will pass verification,
+    and that cff_from_matrix properly assigns d,t,n values
+    in the cff_t struct
+*/
 void test_cff_from_matrix() {
-    printf("Testing cff_from_matrix...\n");
+    puts("Running test_cff_from_matrix...\n");
     // this is a 3-cff(20,25) from a reed solomon code with
     // alphabet len=9, message len=2, codeword len=4
     int matrix[20][25] = {
@@ -161,11 +181,15 @@ void test_cff_from_matrix() {
     assert(cff_get_n(cff) == 25);
     assert(cff_verify(cff));
     cff_free(cff);
-    printf("✓ cff_from_matrix test passed\n");
+    puts("OK test_cff_from_matrix passed\n");
 }
 
+/*
+    Tests that CFF copy works, by verifying
+    that the copied cff is valid
+*/
 void test_cff_copy() {
-    printf("Testing cff_copy...\n");
+    puts("Running test_cff_copy...\n");
     cff_t *cff = cff_alloc(2, 6, 6);
     for (int i = 0; i < 6; i++)
     {
@@ -175,12 +199,15 @@ void test_cff_copy() {
     assert(cff_verify(copy_of_cff));
     cff_free(cff);
     cff_free(copy_of_cff);
-    printf("✓ cff_copy test passed\n");
+    puts("OK test_cff_copy passed\n");
 }
 
-// Test cff_write
+/*
+    Tests that cff_write properly writes
+    a cff to a file
+*/
 void test_cff_write() {
-    printf("Testing cff_write...\n");
+    puts("Running test_cff_write...\n");
     cff_t *cff = cff_alloc(1, 2, 3);
     cff_set_value(cff, 0, 0, 1);
     cff_set_value(cff, 1, 2, 1);
@@ -198,7 +225,7 @@ void test_cff_write() {
     remove("cff_test_output.txt");
 
     cff_free(cff);
-    printf("✓ cff_write test passed\n");
+    puts("OK test_cff_write passed\n");
 }
 
 int main() {
@@ -216,6 +243,6 @@ int main() {
     test_cff_copy();
     test_cff_write();
 
-    printf("\n✓ test_cff tests passed!\n");
+    puts("\nALL test_cff tests passed!\n");
     return 0;
 }

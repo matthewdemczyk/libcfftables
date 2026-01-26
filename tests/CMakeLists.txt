@@ -3,6 +3,7 @@
 # Collect all .c files in this directory
 file(GLOB TEST_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
+    "${CMAKE_CURRENT_SOURCE_DIR}/construction_tests/*.c"
 )
 
 foreach(test_src ${TEST_SOURCES})
