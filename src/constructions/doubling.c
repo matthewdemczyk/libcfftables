@@ -3,7 +3,6 @@
 #include "../../include/libcfftables/libcfftables.h"
 
 #include <stdbool.h>
-#include <string.h>
 #include <math.h>
 
 #include "../CFF_Internals.h"

@@ -3,8 +3,6 @@
 #include "../../include/libcfftables/libcfftables.h"
 #include "../CFF_Internals.h"
 
-#include <string.h>
-
 
 cff_t* cff_additive(const cff_t *left, const cff_t *right)
 {

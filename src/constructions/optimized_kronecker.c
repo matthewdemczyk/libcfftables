@@ -3,7 +3,6 @@
 #include "../CFF_Internals.h"
 
 #include <stddef.h>
-#include <string.h>
 
 cff_t* cff_optimized_kronecker
 (

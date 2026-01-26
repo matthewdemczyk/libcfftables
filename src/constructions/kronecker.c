@@ -2,17 +2,6 @@
 #include "../../include/libcfftables/libcfftables.h"
 #include "../CFF_Internals.h"
 
-#include <string.h>
-
-void kroneckerShortSrcFormatter(char *strBuffer)
-{
-    strcpy(strBuffer, "Kronecker");
-}
-
-void kroneckerLongSrcFormatter(short *consParams, char *strBuffer)
-{
-    sprintf(strBuffer, "Kr(%hd,%hd)", consParams[0], consParams[1]);
-}
 
 cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
 {

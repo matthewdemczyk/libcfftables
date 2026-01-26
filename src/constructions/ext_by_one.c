@@ -3,7 +3,6 @@
 #include "../../include/libcfftables/libcfftables.h"
 #include "../CFF_Internals.h"
 
-#include <string.h>
 #include <stdbool.h>
 
 cff_t* cff_extend_by_one(const cff_t* cff)
