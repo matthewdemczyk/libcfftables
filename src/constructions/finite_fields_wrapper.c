@@ -7,7 +7,7 @@
 #include "flint/fmpz_poly.h"
 #include "flint/fmpz_mod_poly.h"
 
-#include "../CFF_Internals.h"
+#include "../cff_internals.h"
 
 
 // largest power allowed (a field is size prime ^ k)

@@ -2,7 +2,7 @@
 #define LIBCFF_INTERNAL_CONSTRUCTIONS_HEADER
 
 #include "../../include/libcfftables/libcfftables.h"
-#include "../CFF_Internals.h"
+#include "../cff_internals.h"
 
 // these are stored in a row of the table to know which
 // construction a row in the table corresponds to

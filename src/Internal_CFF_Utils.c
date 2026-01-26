@@ -1,4 +1,4 @@
-#include "CFF_Internals.h"
+#include "cff_internals.h"
 
 #include <stdio.h>
 #include <stdbool.h>

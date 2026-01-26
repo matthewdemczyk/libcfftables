@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "../CFF_Internals.h"
+#include "../cff_internals.h"
 
 
 // the function to fill in a table with the doubling construction parameters

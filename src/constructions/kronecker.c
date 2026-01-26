@@ -1,6 +1,6 @@
 #include "construction_internals.h"
 #include "../../include/libcfftables/libcfftables.h"
-#include "../CFF_Internals.h"
+#include "../cff_internals.h"
 
 
 cff_t* cff_kronecker(const cff_t *left, const cff_t *right)

@@ -4,7 +4,7 @@
 #include <stdbool.h>
 #include <math.h>
 
-#include "../CFF_Internals.h"
+#include "../cff_internals.h"
 #include "finite_fields_wrapper.h"
 
 

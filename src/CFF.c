@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "CFF_Internals.h"
+#include "cff_internals.h"
 
 // if true, when running cff_verify(), it will print out which rows in
 // the CFF the d+1 rows of the ID matrix are found on

@@ -4,7 +4,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "CFF_Internals.h"
+#include "cff_internals.h"
 
 #include "constructions/construction_internals.h"
 

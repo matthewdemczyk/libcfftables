@@ -5,9 +5,9 @@
 
 # Collect source files
 set(CORE_SOURCES
-    CFF.c
-    CFF_Tables.c
-    Internal_CFF_Utils.c
+    cff.c
+    cff_tables.c
+    internal_cff_utils.c
 )
 
 set(CONSTRUCTION_SOURCES
