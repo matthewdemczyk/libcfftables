@@ -5,7 +5,7 @@
 void test_cff_identity_1()
 {
     printf("Running test_cff_identity_1 construction...\n");
-    cff_t* cff = cff_identity(15,1);
+    cff_t* cff = cff_identity(1,15);
     assert(cff_verify(cff));
     cff_print(cff);
     cff_free(cff);
@@ -15,7 +15,7 @@ void test_cff_identity_1()
 void test_cff_identity_2()
 {
     printf("Running test_cff_identity_2 construction...\n");
-    cff_t* cff = cff_identity(10,2);
+    cff_t* cff = cff_identity(2,10);
     assert(cff_verify(cff));
     cff_print(cff);
     cff_free(cff);

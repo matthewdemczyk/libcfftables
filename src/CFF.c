@@ -74,6 +74,19 @@ int cff_get_value(const cff_t *cff, int r, int c)
 // make sure to free the memory using cff_free() when finished with the CFF.
 cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix)
 {
+    if (d < 1 || t < 1 || n < 1) {
+        return NULL;
+    }
+    if (matrix == NULL)
+    {
+        return NULL;
+    }
+    // validate that the matrix is actually zeros and ones first
+    for (long long i = 0; i < (long long)t * n; i++) {
+        if (matrix[i] != 0 && matrix[i] != 1) {
+            return NULL;
+        }
+    }
     cff_t *cff = cff_alloc(d, t, n);
     for(int r  = 0; r < t; r++)
     {
@@ -224,6 +237,6 @@ bool cff_verify(const cff_t *cff)
             return false;
         }
         if (CFF_VERIFY_VERBOSE_PRINTOUT) { printf("\n"); }
-    } while (kSubsetLexSuccessor(cff->n, k, cols));
+    } while (k_subset_lex_successor(cff->n, k, cols));
     return true;
 }

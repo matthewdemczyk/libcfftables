@@ -37,6 +37,6 @@ cff_t* cff_sperner(int n)
             }
         }
         col++;
-    } while (kSubsetLexSuccessor(t, t / 2, subset));
+    } while (k_subset_lex_successor(t, t / 2, subset));
     return cff;
 }

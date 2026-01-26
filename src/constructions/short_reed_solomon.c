@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <math.h>
+#include <stdlib.h>
 
 #include "../cff_internals.h"
 #include "finite_fields_wrapper.h"
@@ -15,9 +16,11 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
         return cff_reed_solomon(p, exp, k, m);
     }
     int q = (int) pow(p, exp);
-    int addition_field[q][q];
-    int multiplication_field[q][q];
-    populateFiniteField(p, exp, (int*) addition_field, (int*) multiplication_field);
+    //int addition_field[q][q];
+    //int multiplication_field[q][q];
+    int *addition_field = malloc(q * q * sizeof(int));
+    int *multiplication_field = malloc(q * q * sizeof(int));
+    populate_finite_field(p, exp, (int*) addition_field, (int*) multiplication_field);
 
     int short_m = m - s;
     int short_k = k - s;
@@ -40,7 +43,7 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
 
     int polynomialCoefficients[k];
     int codeword[m];
-    setToAllZeros(k, polynomialCoefficients);
+    set_to_all_zeros(k, polynomialCoefficients);
     int cn = 0; //codeword number
     int numLeadingZeros;
     do
@@ -53,7 +56,7 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
         int x;
         for (x = 0; x < s - 1; x++)
         {
-            codeword[x + 1] = hornerPolynomialEvalOverFq(k, polynomialCoefficients, x, q, addition_field, multiplication_field);
+            codeword[x + 1] = horner_polynomial_eval_over_fq(k, polynomialCoefficients, x, q, addition_field, multiplication_field);
         }
         for (int i = 0; i < s; i++)
         {
@@ -66,7 +69,7 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
         {
             for (; x < m - 1; x++)
             {
-                codeword[x+1] = hornerPolynomialEvalOverFq(k, polynomialCoefficients, x, q, addition_field, multiplication_field);
+                codeword[x+1] = horner_polynomial_eval_over_fq(k, polynomialCoefficients, x, q, addition_field, multiplication_field);
             }
             for (int i = s; i < m; i++)
             {
@@ -74,6 +77,6 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
             }
             cn++;
         }
-    } while (nextLexicographicTuple(q, k, polynomialCoefficients));
+    } while (k_tuple_lex_successor(q, k, polynomialCoefficients));
     return cff;
 }

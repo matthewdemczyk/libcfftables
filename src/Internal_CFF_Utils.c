@@ -72,20 +72,8 @@ long factorial(int n)
     return result;
 }
 
-/*
-    Sets buffer to {0, 1, ..., k-1}
-*/
-void setToFirstLexOrder(int k, int *buffer)
-{
-    for(int i = 0; i < k; i++)
-    {
-        buffer[i] = i;
-    }
-}
-
-
 // Sets T to all zeros
-void setToAllZeros(int n, int *T)
+void set_to_all_zeros(int n, int *T)
 {
     for(int i = 0; i < n; i++)
     {
@@ -94,7 +82,7 @@ void setToAllZeros(int n, int *T)
 }
 
 // Replaces "buffer" with the next consecutive lexicographic subset of Zn (size k).
-bool kSubsetLexSuccessor(int n, int k, int *buffer)
+bool k_subset_lex_successor(int n, int k, int *buffer)
 {
     for (int i = k-1; i > -1; i--)
     {
@@ -111,7 +99,7 @@ bool kSubsetLexSuccessor(int n, int k, int *buffer)
     return false;
 }
 
-bool nextLexicographicTuple(int n, int k, int *buffer)
+bool k_tuple_lex_successor(int n, int k, int *buffer)
 {
     for (int i = k-1; i > -1; i--)
     {
@@ -142,7 +130,7 @@ int ipow(int base, int exp)
 
 
 // https://en.wikipedia.org/wiki/Sieve_of_Eratosthenes
-void prime_power_sieve(int n, bool *prime_array)
+void prime_sieve(int n, bool *prime_array)
 {
     // set initial array values
     for (int i = 0; i < n; i++)

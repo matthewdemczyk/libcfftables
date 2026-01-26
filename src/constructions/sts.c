@@ -5,15 +5,16 @@
 #include <stdlib.h>
 
 
-void addSTS(CFF_Table *table, int t_max)
+void cff_table_add_sts_cffs(cff_table_ctx_t *ctx, int t_max)
 {
+    cff_table_t *table = ctx->tables_array[1]; //get 2-cff table
     long long n;
     for (int v = 2; v <= t_max; v++)
     {
         if (v % 6 == 3 || v % 6 == 1)
         {
             n = ((v * (v - 1)) / 6);
-            updateTable(table, v, n, CFF_CONSTRUCTION_ID_STS, v, 0, 0, 0, 0);
+            update_table(table, v, n, CFF_CONSTRUCTION_ID_STS, v, 0, 0, 0, 0);
         }
     }
 }

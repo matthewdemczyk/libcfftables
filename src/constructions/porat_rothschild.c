@@ -10,7 +10,7 @@
 
 
 // will be returned, completely filled, by the porat construction
-typedef struct GeneratorMatrixStruct {
+typedef struct generator_matrix {
     int q;
     int k;
     int r;
@@ -21,9 +21,9 @@ typedef struct GeneratorMatrixStruct {
     int* code;
     int numCodewords;
     int minDistance;
-} GeneratorMatrixStruct;
+} generator_matrix_t;
 
-cff_t* genmatrixToCFF(GeneratorMatrixStruct gs)
+cff_t* gen_matrix_to_cff(generator_matrix_t gs)
 {
     cff_t* cff = cff_alloc(
         (gs.m - 1 ) / (gs.m - (gs.minDistance)),// d
@@ -42,7 +42,7 @@ cff_t* genmatrixToCFF(GeneratorMatrixStruct gs)
     return cff;
 }
 
-double poratEntropyFunction(double q, double r)
+double porat_entropy_function(double q, double r)
 {
     return (
         (
@@ -58,8 +58,9 @@ double poratEntropyFunction(double q, double r)
     );
 }
 
-void addPoratCodes(CFF_Table* table, int cff_d, int t_max, bool* prime_array)
+void cff_table_add_porat_rothschild_cffs(cff_table_ctx_t *ctx, int cff_d, int t_max, bool *prime_array)
 {
+    cff_table_t *table = ctx->tables_array[cff_d-1];
     long long cff_n;
     int cff_t, r, k, m;
     double Hq;
@@ -72,12 +73,12 @@ void addPoratCodes(CFF_Table* table, int cff_d, int t_max, bool* prime_array)
             {
                 k = 1;
                 cff_n = q;
-                Hq = poratEntropyFunction((double) q, (double) r);
+                Hq = porat_entropy_function((double) q, (double) r);
                 m = ceil( ((double) (k)) / (1.0 - Hq) );
                 cff_t = m * q;
                 while (cff_t <= t_max && cff_n != 0)
                 {
-                    updateTable(table, cff_t, cff_n, CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD, p,e,k,m,r);
+                    update_table(table, cff_t, cff_n, CFF_CONSTRUCTION_ID_PORAT_ROTHSCHILD, p,e,k,m,r);
                     // change array to test next
                     k++;
                     m = (int) ceil( ((double) (k)) / (1.0 - Hq) );
@@ -90,7 +91,7 @@ void addPoratCodes(CFF_Table* table, int cff_d, int t_max, bool* prime_array)
 }
 
 // reverse (index revere, not total order reverse) lexicographic k-tuple successor
-bool nextReverseLex(int n, int k, int buffer[k])
+bool k_tuple_reverse_lex_successor(int n, int k, int buffer[k])
 {
     for (int i = 0; i < k; i++)
     {
@@ -107,14 +108,14 @@ bool nextReverseLex(int n, int k, int buffer[k])
     return false;
 }
 
-void freeGeneratorMatrixStruct(GeneratorMatrixStruct genMatrixStruct)
+void freegenerator_matrix_t(generator_matrix_t genMatrixStruct)
 {
     free(genMatrixStruct.generatorMatrix);
     free(genMatrixStruct.code);
 }
 
 // Porat construction
-GeneratorMatrixStruct poratRothschildConstructCode(int p, int a, int k, int r, int m)
+generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r, int m)
 {
     int q = compute_field_size(p,a);
     int add[q][q];
@@ -122,16 +123,16 @@ GeneratorMatrixStruct poratRothschildConstructCode(int p, int a, int k, int r, i
     int mult_inverses[q];
     int add_inverses[q];
 
-    populateFiniteField(p,a,(int *)add,(int *)mult);
-    populateAdditiveInverses(p, a,(int *) add, add_inverses); //remove this linear search
-    populateMultiplicativeInverses(p, a,(int *) mult, mult_inverses);
+    populate_finite_field(p,a,(int *)add,(int *)mult);
+    populate_additive_inverses(p, a,(int *) add, add_inverses); //remove this linear search
+    populate_multiplicative_inverses(p, a,(int *) mult, mult_inverses);
     if (q < 2 * r || q >= 4 * r)
     {
         printf("Parameters do not match thm requirments. q not in [2r, 4r)\n");
     }
     // determine other parameters from q,k,d (cff's d)
     double delta = (((double) r) - 1.0) / ((double) r);
-    double Hq = poratEntropyFunction((double) q, (double) r);
+    double Hq = porat_entropy_function((double) q, (double) r);
     if (m == 0)
     {
         m = (int) ceil(((double) (k)) / (1.0 - Hq));
@@ -185,7 +186,7 @@ GeneratorMatrixStruct poratRothschildConstructCode(int p, int a, int k, int r, i
             y[h][i] = k_tuple_buffer[i];
         }
         h++;
-    } while (nextReverseLex(q, k, k_tuple_buffer));
+    } while (k_tuple_reverse_lex_successor(q, k, k_tuple_buffer));
 
     // loop over each cell in generator matrix, start filling it in
     int c, v;
@@ -247,7 +248,7 @@ GeneratorMatrixStruct poratRothschildConstructCode(int p, int a, int k, int r, i
         }
     }
 
-    GeneratorMatrixStruct genMatrixStruct;
+    generator_matrix_t genMatrixStruct;
     genMatrixStruct.q = q;
     genMatrixStruct.k = k;
     genMatrixStruct.r = r;
@@ -267,8 +268,8 @@ GeneratorMatrixStruct poratRothschildConstructCode(int p, int a, int k, int r, i
 
 cff_t* cff_porat_rothschild(int p, int a, int k, int r, int m)
 {
-    GeneratorMatrixStruct gs = poratRothschildConstructCode(p,a,k,r,m);
-    cff_t *cff = genmatrixToCFF(gs);
-    freeGeneratorMatrixStruct(gs);
+    generator_matrix_t gs = porat_rothschild_code_construction(p,a,k,r,m);
+    cff_t *cff = gen_matrix_to_cff(gs);
+    freegenerator_matrix_t(gs);
     return cff;
 }

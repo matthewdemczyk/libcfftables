@@ -75,12 +75,12 @@ static inline int convertPolynomialToInteger_opt(int base, int k, const int* num
     return ret;
 }
 
-// helper function to used in populateFiniteField
+// helper function to used in populate_finite_field
 static inline int* get_element(int *array, int row, int col, int field_size) {
     return &array[row * field_size + col];
 }
 
-void populateFiniteField(int p, int k, int *addition_field, int *multiplication_field) {
+void populate_finite_field(int p, int k, int *addition_field, int *multiplication_field) {
     if (k > MAX_K || k <= 0 || p <= 1) {
         //return -1;
         exit(1); // invalid parameters
@@ -189,18 +189,20 @@ void populateFiniteField(int p, int k, int *addition_field, int *multiplication_
 }
 // horner's method
 // https://en.wikipedia.org/wiki/Horner%27s_method#Polynomial_evaluation_and_long_division
-int hornerPolynomialEvalOverFq(int polyLength, int polynomialCoefficients[polyLength], int x, int q, int addition_field[q][q], int multiplication_field[q][q])
+int horner_polynomial_eval_over_fq(int polyLength, int *polynomialCoefficients, int x, int q, int *addition_field, int *multiplication_field)
 {
     int polynomialSolution = polynomialCoefficients[0];
     for (int j = 1; j < polyLength; j++)
     {
-        polynomialSolution = addition_field[polynomialCoefficients[j]][multiplication_field[polynomialSolution][x]];
+        //polynomialSolution = addition_field[polynomialCoefficients[j]][multiplication_field[polynomialSolution][x]];
+         int mult_result = multiplication_field[polynomialSolution * q + x];
+        polynomialSolution = addition_field[polynomialCoefficients[j] * q + mult_result];
     }
     return polynomialSolution;
 }
 
-// (could do this inside of populateFiniteField to avoid these loops)
-void populateAdditiveInverses(int p, int k, int* addition_field, int* additive_inverses)
+// (could do this inside of populate_finite_field to avoid these linear searches)
+void populate_additive_inverses(int p, int k, int* addition_field, int* additive_inverses)
 {
     int field_size = compute_field_size(p, k);
     for (int i = 0; i < field_size; i++)
@@ -215,7 +217,7 @@ void populateAdditiveInverses(int p, int k, int* addition_field, int* additive_i
     }
 }
 
-void populateMultiplicativeInverses(int p, int k, int* multiplication_field, int* multiplicative_inverses)
+void populate_multiplicative_inverses(int p, int k, int* multiplication_field, int* multiplicative_inverses)
 {
     int field_size = compute_field_size(p, k);
     multiplicative_inverses[0] = -1;

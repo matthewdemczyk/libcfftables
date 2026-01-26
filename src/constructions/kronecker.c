@@ -50,4 +50,4 @@ cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
 
 // the function to add kronecker product construction parameters to the tables is in the file
 // src/constructions/Optimized_Kronecker_Construction.c
-// function: void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d);
+// function: void applyPairConstructions(cff_table_t *table, cff_table_t *d_minus_one_table, int cff_d);

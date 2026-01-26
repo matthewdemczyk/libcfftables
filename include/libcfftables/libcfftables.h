@@ -59,12 +59,32 @@ typedef struct cff_table_ctx cff_table_ctx_t;
  * Core CFF Operations
  * ============================================================================ */
 
-// allocates a CFF filled with zeros (must be freed with cff_free)
+/**
+ * @brief Allocates a `cff_t`, which stores a `d-CFF(t,n)`, filled with zeros.
+ *
+ * @param d The `d` of the CFF.
+ * @param t The number of rows in the CFF's incidence matrix.
+ * @param n The number of columns in the CFF's incidence matrix.
+ *
+ * @return A newly allocated cff_t filled with zeros.
+ */
 cff_t* cff_alloc(int d, int t, long long n);
-// frees a CoverFreeFamily from memory
+/**
+ * @brief Frees a `cff_t` from memory.
+ *
+ * @param cff The `cff_t` to free.
+ */
 void cff_free(cff_t *cff);
 
-// allocates a d-CFF(t,n) and sets its values from a 0-1 int matrix (must be freed with cff_free)
+/**
+ * @brief Initialze a `cff_t` from an int matrix of 0s and 1s
+ *
+ * @param d The `d` of the CFF
+ * @param t The number of rows of the CFF's incidence matrix
+ * @param n The number of columns of the CFF's incidence matrix
+ * @param matrix A row-major `int` array of 0s and 1s, with `t` rows and `n` columns
+ * @returns A pointer to a newly allocated `d-CFF(t,n)` with cells set from `matrix`, or NULL on failure
+ */
 cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix);
 
 // allocates and makes a copy of a cff (must be freed with cff_free)
@@ -91,26 +111,35 @@ bool cff_verify(const cff_t *cff);
  * Individual Construction Algorithms
  * ============================================================================ */
 
-// direct constructions
-cff_t* cff_identity(int n, int d);
 /**
- * @brief Creates a Sperner-based CFF
+ * @brief Constructs a CFF from an n x n identity matrix.
  *
- * Example usage:
- * @code
- * cff_t *sperner = cff_sperner(10);
- * if (sperner) {
- *     cff_print(sperner);
- *     cff_free(sperner);
- * }
- * @endcode
+ * @param d The `d` of the resulting CFF
+ * @param n Number of rows and cols in the resulting CFF, must be greater than `d`
+ * @return Pointer to a `d-CFF(n,n)`, or NULL on failure
+ */
+cff_t* cff_identity(int d, int n);
+/**
+ * @brief Constructs a CFF from a Sperner system.
  *
- * @param n Size parameter
- * @return Pointer to newly allocated CFF, or NULL on failure
+ * @param n Number of subsets in the sperner system/CFF
+ * @return Pointer to newly allocated `1-CFF(t = min{s : choose(s, s/2) >= n }, n)`, or `NULL` on failure
  */
 cff_t* cff_sperner(int n);
+/**
+ * @brief Constructs a 2-CFF from a Steiner Triple System.
+ *
+ * @param v Order of the STS
+ * @returns Pointer to a `2-CFF(v, (v * (v - 1)) / 6)`, or `NULL` on failure
+ */
 cff_t* cff_sts(int v);
+/**
+ * TODO
+ */
 cff_t* cff_porat_rothschild(int p, int a, int k, int r, int m);
+/**
+ * @brief Constructs a CFF from a Reed-Solomon error correcting code
+ */
 cff_t* cff_reed_solomon(int p, int exp, int t, int m);
 cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s);
 cff_t* get_fixed_cff(int d, int t);

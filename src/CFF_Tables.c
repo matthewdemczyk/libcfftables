@@ -11,26 +11,26 @@
 // this is used in cff_table_get_by_t_rec to keep track of
 // all itermediate CFFs created, then the CFFs are free'd
 // after the final CFF is constructed
-typedef struct IntermediateCFFsList {
+typedef struct intermediate_cffs_list {
     int d;
     int t;
-    struct IntermediateCFFsList *next;
-} IntermediateCFFsList;
+    struct intermediate_cffs_list *next;
+} intermediate_cffs_list_t;
 
-cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCFFsList **lst)
+cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, intermediate_cffs_list_t **lst)
 {
     cff_t *cff;
     if (ctx->tables_array[d-1]->array[t].cff == NULL)
     {
-        // setup this node in IntermediateCFFsList so itermediate CFFs
+        // setup this node in intermediate_cffs_list_t so itermediate CFFs
         // can be freed once to final CFF is constructed
-        IntermediateCFFsList *node = malloc(sizeof(IntermediateCFFsList));
+        intermediate_cffs_list_t *node = malloc(sizeof(intermediate_cffs_list_t));
         if (node == NULL)
         {   // handle malloc failure
             // clean up the list we've built so far
-            IntermediateCFFsList *curr = *lst;
+            intermediate_cffs_list_t *curr = *lst;
             while (curr != NULL) {
-                IntermediateCFFsList *next = curr->next;
+                intermediate_cffs_list_t *next = curr->next;
                 free(curr);
                 curr = next;
             }
@@ -45,7 +45,7 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCF
         switch (ctx->tables_array[d-1]->array[t].constructionID)
         {
         case CFF_CONSTRUCTION_ID_IDENTITY_MATRIX:
-            cff = cff_identity(t, d);
+            cff = cff_identity(d, t);
             break;
         case CFF_CONSTRUCTION_ID_SPERNER:
             cff = cff_sperner((int) ctx->tables_array[d-1]->array[t].n);
@@ -123,16 +123,16 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
 {
     // setup linked list of intermediate CFFs needed in construction
     // so we can free them later without iterating over the entire table
-    IntermediateCFFsList *head = NULL;
+    intermediate_cffs_list_t *head = NULL;
 
     // do the constructions
     cff_t *cff = cff_table_get_by_t_rec(ctx, d, t, &head);
 
     // free itermediate cffs
-    IntermediateCFFsList *curr = head;
+    intermediate_cffs_list_t *curr = head;
     while (curr != NULL)
     {
-        IntermediateCFFsList *next = curr->next;
+        intermediate_cffs_list_t *next = curr->next;
         // dont free the one we want constructed!
         if(!(curr->t == t && curr->d ==d))
         {
@@ -149,12 +149,12 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
 
 cff_t* cff_table_get_by_n(cff_table_ctx_t *ctx, int d, int n)
 {
-    int t = binarySearchTable(ctx->tables_array[d-1], n);
+    int t = binary_search_table(ctx->tables_array[d-1], n);
     return cff_table_get_by_t(ctx, d, t);
 }
 
-inline __attribute__((always_inline)) void updateTable(
-    CFF_Table *table,
+void update_table(
+    cff_table_t *table,
     int t,
     long long n,
     int constructionID,
@@ -188,7 +188,7 @@ inline __attribute__((always_inline)) void updateTable(
     }
 }
 
-int binarySearchTable(CFF_Table *table, long long n) {
+int binary_search_table(cff_table_t *table, long long n) {
     int low = 0;
     int high = table->numCFFs - 1;
 
@@ -216,9 +216,9 @@ int binarySearchTable(CFF_Table *table, long long n) {
 }
 
 // helper used in makeTables()
-CFF_Table* initializeTable(int numCFFs, int cff_d, long long n_max)
+cff_table_t* initializeTable(int numCFFs, int cff_d, long long n_max)
 {
-    CFF_Table *table = malloc(sizeof(CFF_Table));
+    cff_table_t *table = malloc(sizeof(cff_table_t));
     if (table == NULL)
     {
         printf("malloc fail'd table in initializeTable\n");
@@ -229,7 +229,7 @@ CFF_Table* initializeTable(int numCFFs, int cff_d, long long n_max)
     table->d = cff_d;
     table->n_max = n_max;
     // allocate space for the t=0 cff because this array should be indexed starting at 1
-    table->array = malloc(sizeof(CFF_Table_Row)*(table->numCFFs+1));
+    table->array = malloc(sizeof(cff_table_row_t)*(table->numCFFs+1));
     if (table->array == NULL)
     {
         printf("malloc fail'd table->array in initializeTable\n");
@@ -250,10 +250,10 @@ CFF_Table* initializeTable(int numCFFs, int cff_d, long long n_max)
     return table;
 }
 
-// helper used in makeTables()
-CFF_Table* makeSpernerTable()
+// sperners are always optimal 1-CFFs so this is a special case (no need to start with ID matrices)
+cff_table_t* makeSpernerTable()
 {
-    CFF_Table *table = initializeTable(67, 1, 0);
+    cff_table_t *table = initializeTable(67, 1, 0);
     for (int t = 4; t <= table->numCFFs; t++)
     {
         table->array[t].n = choose(t, t/2);
@@ -274,16 +274,16 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
 
     // setup tables ctx
     // the tables ctx stores an array of pointers to each table, and
-    // also stores the max d t and n allowed in the tables
+    // also stores the max d, t, and n allowed in the tables
     cff_table_ctx_t *ctx = malloc(sizeof(cff_table_ctx_t));
     ctx->d_max = d_maximum;
     ctx->t_max = t_maximum;
     ctx->n_max = n_maximum;
-    ctx->tables_array = malloc(sizeof(CFF_Table*) * d_maximum);
+    ctx->tables_array = malloc(sizeof(cff_table_t*) * d_maximum);
 
     // create an array of booleans to determine if numbers are prime
     bool *prime_array = malloc(sizeof(bool)*t_maximum + 1);
-    prime_power_sieve(t_maximum, prime_array);
+    prime_sieve(t_maximum, prime_array);
 
     // each table is stored in this array of pointers to structs, where each struct is one table
 
@@ -296,17 +296,17 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
     {
         ctx->tables_array[1] = initializeTable(t_maximum+1, 2, n_maximum);
         cff_table_add_fixed_cffs(ctx);
-        addSTS(ctx->tables_array[1], t_maximum);
-        addReedSolomonCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
-        addPoratCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
+        cff_table_add_sts_cffs(ctx, t_maximum);
+        cff_table_add_reed_solomon_cffs(ctx, 2, t_maximum, prime_array);
+        cff_table_add_porat_rothschild_cffs(ctx, 2, t_maximum, prime_array);
         ctx->tables_array[1]->hasBeenChanged = true;
         while(ctx->tables_array[1]->hasBeenChanged)
         {
             c++;
             ctx->tables_array[1]->hasBeenChanged = false;
-            doublingConstructionFiller(ctx->tables_array[1], ctx->tables_array[0]);
-            extendByOneConstructionFiller(ctx->tables_array[1], 2);
-            applyPairConstructions(ctx->tables_array[1], ctx->tables_array[0], 2);
+            cff_table_add_doubling_cffs(ctx);
+            cff_table_add_ext_by_one_cffs(ctx, 2);
+            cff_table_add_pair_constructed_cffs(ctx, 2);
         }
         ctx->tables_array[1]->num_loops_when_creating = c;
     }
@@ -315,16 +315,16 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
     for (int cff_d = 3; cff_d < d_maximum+1; cff_d++)
     {
         ctx->tables_array[cff_d-1] = initializeTable(t_maximum+1, cff_d, n_maximum);
-        addReedSolomonCodes(ctx->tables_array[cff_d-1], cff_d, t_maximum, prime_array);
-        addPoratCodes(ctx->tables_array[cff_d-1], cff_d, t_maximum, prime_array);
+        cff_table_add_reed_solomon_cffs(ctx, cff_d, t_maximum, prime_array);
+        cff_table_add_porat_rothschild_cffs(ctx, cff_d, t_maximum, prime_array);
         ctx->tables_array[cff_d-1]->hasBeenChanged = true;
         c = 0;
         while(ctx->tables_array[cff_d-1]->hasBeenChanged)
         {
             c++;
             ctx->tables_array[cff_d-1]->hasBeenChanged = false;
-            extendByOneConstructionFiller(ctx->tables_array[cff_d-1], cff_d);
-            applyPairConstructions(ctx->tables_array[cff_d-1], ctx->tables_array[cff_d-2], cff_d);
+            cff_table_add_ext_by_one_cffs(ctx, cff_d);
+            cff_table_add_pair_constructed_cffs(ctx, cff_d);
         }
         ctx->tables_array[cff_d-1]->num_loops_when_creating = c;
     }

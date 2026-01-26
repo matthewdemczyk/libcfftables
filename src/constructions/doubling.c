@@ -9,17 +9,19 @@
 
 
 // the function to fill in a table with the doubling construction parameters
-void doublingConstructionFiller(CFF_Table *table_2, CFF_Table *table_1)
+void cff_table_add_doubling_cffs(cff_table_ctx_t *ctx)
 {
     long long n;
     int s;
+    cff_table_t *table_1 = ctx->tables_array[0];
+    cff_table_t *table_2 = ctx->tables_array[1];
     for (int t = 2; t < table_2->numCFFs; t++)
     {
         n = table_2->array[t].n;
-        s = binarySearchTable(table_1, n);
+        s = binary_search_table(table_1, n);
         if (s != -1)
         {
-            updateTable(table_2, t + s + 2 - (s % 2), 2 * n, CFF_CONSTRUCTION_ID_DOUBLING, t, s, 0, 0, 0);
+            update_table(table_2, t + s + 2 - (s % 2), 2 * n, CFF_CONSTRUCTION_ID_DOUBLING, t, s, 0, 0, 0);
         }
     }
 }
@@ -85,7 +87,7 @@ cff_t* cff_doubling(const cff_t *cff, int s)
             cff_set_value(resultCFF, i + cff->t, column + cff->n, 1 - char_vector[i]);
         }
         column++;
-    } while(kSubsetLexSuccessor(s, ceil_s_over_2, subset));
+    } while(k_subset_lex_successor(s, ceil_s_over_2, subset));
 
     // add rows of 0s or 1s at the bottom
     if (s % 2 == 1)

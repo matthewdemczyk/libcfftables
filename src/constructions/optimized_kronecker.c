@@ -77,10 +77,12 @@ cff_t* cff_optimized_kronecker
     return product_cff;
 }
 
-void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int cff_d)
+void cff_table_add_pair_constructed_cffs(cff_table_ctx_t *ctx, int cff_d)
 {
     int t, s;
     long long n;
+    cff_table_t *table = ctx->tables_array[cff_d-1];
+    cff_table_t *d_minus_one_table = ctx->tables_array[cff_d-2];
     for (int t1 = cff_d; t1 < table->numCFFs - 1; t1++)
     {
         for (int t2 = t1; t2 < table->numCFFs; t2++)
@@ -92,28 +94,28 @@ void applyPairConstructions(CFF_Table *table, CFF_Table *d_minus_one_table, int 
                 break;
             }
             n = table->array[t1].n + table->array[t2].n;
-            updateTable(table, t, n, CFF_CONSTRUCTION_ID_ADDITIVE, t1, t2, 0, 0, 0);
+            update_table(table, t, n, CFF_CONSTRUCTION_ID_ADDITIVE, t1, t2, 0, 0, 0);
 
             // kronecker product
             t = t1 * t2;
             n = table->array[t1].n * table->array[t2].n;
-            updateTable(table, t, n, CFF_CONSTRUCTION_ID_KRONECKER, t1, t2, 0, 0, 0);
+            update_table(table, t, n, CFF_CONSTRUCTION_ID_KRONECKER, t1, t2, 0, 0, 0);
 
             // try optimized kronecker in both combinations (t1,t2) & (t2,t1)
-            s = binarySearchTable(d_minus_one_table, table->array[t2].n);
+            s = binary_search_table(d_minus_one_table, table->array[t2].n);
             if (s != -1)
             {
                 t = (s * t1) + t2;
                 n = table->array[t1].n * table->array[t2].n;
-                updateTable(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t1, t2, s, 0, 0);
+                update_table(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t1, t2, s, 0, 0);
             }
             // try the other way for opt kronecker
-            s = binarySearchTable(d_minus_one_table, table->array[t1].n);
+            s = binary_search_table(d_minus_one_table, table->array[t1].n);
             if (s != -1)
             {
                 t = (s * t2) + t1;
                 n = table->array[t1].n * table->array[t2].n;
-                updateTable(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t2, t1, s, 0, 0);
+                update_table(table, t, n, CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER, t2, t1, s, 0, 0);
             }
         }
     }

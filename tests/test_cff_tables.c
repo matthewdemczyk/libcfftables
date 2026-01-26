@@ -26,7 +26,7 @@ void test_cff_table_get_by_t_2()
 
 void test_cff_table()
 {
-    cff_table_ctx_t *ctx = cff_table_create(10,200,20000);
+    cff_table_ctx_t *ctx = cff_table_create(10,200,200000);
     cff_table_write_csv(ctx, "/mnt/e/cfftablescython/tables");
     cff_table_free(ctx);
 }

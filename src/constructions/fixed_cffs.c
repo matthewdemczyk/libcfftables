@@ -355,7 +355,7 @@ cff_t* get_fixed_cff(int d, int t)
 
 void cff_table_add_fixed_cffs(cff_table_ctx_t *ctx)
 {
-    CFF_Table *table = ctx->tables_array[1];
+    cff_table_t *table = ctx->tables_array[1];
 
     table->array[10].n = 13;
     table->array[10].consParams[0] = 10; //the t of the cff
