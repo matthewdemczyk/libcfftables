@@ -19,7 +19,7 @@ cff_t* cff_alloc(int d, int t, long long n)
     c->t = t;
     c->n = n;
     c->stride_bits = ((n + 7) / 8) * 8;
-    c->matrix = calloc(((n + 7) / 8) * t, sizeof(uint8_t));
+    c->matrix = calloc(((n + 7) / 8) * t, sizeof(unsigned char));
     return c;
 }
 

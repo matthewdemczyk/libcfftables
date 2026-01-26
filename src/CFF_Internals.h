@@ -12,7 +12,7 @@ struct cff
     int t;
     long long n;
     int stride_bits; // helper for faster memory access
-    uint8_t *matrix;
+    unsigned char *matrix;
 };
 
 typedef struct
@@ -28,6 +28,7 @@ typedef struct
     bool hasBeenChanged;
     int d;
     int numCFFs;
+    int num_loops_when_creating;
     long long n_max; //need to store on each table because
                       //its accessed in updateTable
     CFF_Table_Row *array; //an array of length numCFFs + 1

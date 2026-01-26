@@ -80,7 +80,7 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, IntermediateCF
             );
             break;
         case CFF_CONSTRUCTION_ID_FIXED_CFF:
-            cff = cff_identity(t, d);
+            cff = get_fixed_cff(d, t);
             break;
         case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
             // this can be improved a lot by checking how many ext by ones it will do in advance, then
@@ -260,10 +260,11 @@ CFF_Table* makeSpernerTable()
         table->array[t].consParams[0] = t;
         table->array[t].constructionID = (short) CFF_CONSTRUCTION_ID_SPERNER;
     }
+    table->num_loops_when_creating = 1;
     return table;
 }
 
-cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maximum, bool printLoops, bool useBinConstWeightCodes)
+cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maximum)
 {
     // save memory:
     if (t_maximum > n_maximum)
@@ -288,17 +289,13 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
 
     // best 1-CFFs are sperner systems, make these seperately
     ctx->tables_array[0] = makeSpernerTable();
-    if (printLoops) printf("Finished d=1 table\n");
 
     // 2-CFFs have more constructions, so handle it seperately
     int c = 0;
     if (d_maximum > 1)
     {
         ctx->tables_array[1] = initializeTable(t_maximum+1, 2, n_maximum);
-        if (useBinConstWeightCodes)
-        {
-            cff_table_add_fixed_cffs(ctx->tables_array[1]);
-        }
+        cff_table_add_fixed_cffs(ctx);
         addSTS(ctx->tables_array[1], t_maximum);
         addReedSolomonCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
         addPoratCodes(ctx->tables_array[1], 2, t_maximum, prime_array);
@@ -311,7 +308,7 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
             extendByOneConstructionFiller(ctx->tables_array[1], 2);
             applyPairConstructions(ctx->tables_array[1], ctx->tables_array[0], 2);
         }
-        if (printLoops) printf("looped %d times for d=2\n", c);
+        ctx->tables_array[1]->num_loops_when_creating = c;
     }
 
     //tables for d=3 ... d_max
@@ -329,7 +326,7 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
             extendByOneConstructionFiller(ctx->tables_array[cff_d-1], cff_d);
             applyPairConstructions(ctx->tables_array[cff_d-1], ctx->tables_array[cff_d-2], cff_d);
         }
-        if (printLoops) printf("looped %d times for d=%d\n", c, cff_d);
+        ctx->tables_array[cff_d-1]->num_loops_when_creating = c;
     }
     free(prime_array);
     return ctx;
@@ -339,13 +336,12 @@ void cff_table_free(cff_table_ctx_t *ctx)
 {
     for (int d = 0; d < ctx->d_max; d++)
     {
-        CFF_Table *table = ctx->tables_array[d];
-        for (int i = 0; i < table->numCFFs; i++)
+        for (int i = 0; i < ctx->tables_array[d]->numCFFs; i++)
         {
-            cff_free(table->array[i].cff);
+            cff_free(ctx->tables_array[d]->array[i].cff);
         }
-        free(table->array);
-        free(table);
+        free(ctx->tables_array[d]->array);
+        free(ctx->tables_array[d]);
     }
     free(ctx->tables_array);
     free(ctx);
@@ -473,4 +469,9 @@ void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path)
         }
         fclose(fptr);
     }
+}
+
+int cff_table_get_num_loops_done_to_create(cff_table_ctx_t *ctx, int d)
+{
+    return ctx->tables_array[d-1]->num_loops_when_creating;
 }
