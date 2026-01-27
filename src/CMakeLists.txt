@@ -58,7 +58,7 @@ target_compile_options(libcfftables PRIVATE
 # Enable LTO (Link Time Optimization) if supported
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_supported)
-if(ipo_supported)
+if(ipo_supported AND CMAKE_BUILD_TYPE STREQUAL "Release")
     set_property(TARGET libcfftables PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 endif()
 

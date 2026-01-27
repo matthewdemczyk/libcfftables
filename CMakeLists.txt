@@ -103,6 +103,5 @@ install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libcfftables.pc
 
 # Build tests if testing is enabled
 if(BUILD_TESTING)
-    enable_testing()
     add_subdirectory(tests)
 endif()
