@@ -1,0 +1,36 @@
+PROJECT_NAME           = "libcfftables"
+PROJECT_BRIEF          = "Cover-Free Family construction and manipulation"
+OUTPUT_DIRECTORY       = docs
+INPUT                  = include/
+FILE_PATTERNS          = *.h
+RECURSIVE              = YES
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+EXTRACT_ALL            = NO
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = NO
+
+# Better output
+HTML_OUTPUT            = html
+HTML_COLORSTYLE_HUE    = 220
+HTML_COLORSTYLE_SAT    = 100
+HTML_COLORSTYLE_GAMMA  = 80
+
+# Show only documented entities
+EXTRACT_ALL            = YES
+HIDE_UNDOC_MEMBERS     = YES
+HIDE_UNDOC_CLASSES     = YES
+
+# Better organization
+SORT_MEMBER_DOCS       = YES
+SORT_BRIEF_DOCS        = YES
+
+# Show source code
+SOURCE_BROWSER         = YES
+INLINE_SOURCES         = YES
+
+# Better navigation
+GENERATE_TREEVIEW      = YES
+TREEVIEW_WIDTH         = 250
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO

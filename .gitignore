@@ -5,6 +5,9 @@
 build/
 Testing/
 tables/
+docs/
+docs/html
+docs/latex
 
 # Don't commit the conda recipe
 conda-recipe/
