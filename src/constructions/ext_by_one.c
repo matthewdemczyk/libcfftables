@@ -7,7 +7,10 @@
 
 cff_t* cff_extend_by_one(const cff_t* cff)
 {
-    return cff_additive(cff, cff_identity(cff->d,1));
+    cff_t *one_by_one_cff = cff_identity(cff->d,1);
+    cff_t *result_cff = cff_additive(cff, one_by_one_cff);
+    cff_free(one_by_one_cff);
+    return result_cff;
 }
 
 void cff_table_add_ext_by_one_cffs(cff_table_ctx_t *ctx, int cff_d)
