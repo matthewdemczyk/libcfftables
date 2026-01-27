@@ -78,5 +78,7 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
             cn++;
         }
     } while (k_tuple_lex_successor(q, k, polynomialCoefficients));
+    free(addition_field);
+    free(multiplication_field);
     return cff;
 }

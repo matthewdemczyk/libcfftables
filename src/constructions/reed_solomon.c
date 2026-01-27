@@ -90,6 +90,7 @@ cff_t* cff_reed_solomon(int p, int exp, int t, int m)
         }
         cn++;
     } while (k_tuple_lex_successor(q, t, polynomial_coefficients));
-
+    free(addition_field);
+    free(multiplication_field);
    return cff;
 }
