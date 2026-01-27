@@ -4,9 +4,9 @@
 
 void test_fixed_constructions()
 {
-    for (int i = 12; i < 24; i++)
+    for (int i = 10; i < 24; i++)
     {
-        cff_t *cff = get_fixed_cff(2, i);
+        cff_t *cff = cff_fixed(2, i);
         cff_print(cff);
         assert(cff_verify(cff));
         cff_free(cff);
@@ -15,10 +15,10 @@ void test_fixed_constructions()
 
 void test_fixed_construction_not_found()
 {
-    cff_t *cff = get_fixed_cff(1,1); //ask for a cff that isnt a fixed cff
+    cff_t *cff = cff_fixed(1,1); //ask for a cff that isnt a fixed cff
     assert(cff == NULL);
 
-    cff = get_fixed_cff(2,1); //ask for a cff that isnt a fixed cff
+    cff = cff_fixed(2,1); //ask for a cff that isnt a fixed cff
     assert(cff == NULL);
 }
 
