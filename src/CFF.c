@@ -15,11 +15,13 @@
 cff_t* cff_alloc(int d, int t, long long n)
 {
     cff_t* c = malloc(sizeof(cff_t));
+    if (c == NULL) return NULL;
     c->d = d;
     c->t = t;
     c->n = n;
     c->stride_bits = ((n + 7) / 8) * 8;
     c->matrix = calloc(((n + 7) / 8) * t, sizeof(unsigned char));
+    if (c->matrix == NULL) return NULL;
     return c;
 }
 
@@ -32,21 +34,25 @@ void cff_free(cff_t *cff)
 
 int cff_get_d(const cff_t *cff)
 {
+    if (!cff) return -1;
     return cff->d;
 }
 
 void cff_set_d(cff_t *cff, int d)
 {
+     if (!cff) return;
     cff->d = d;
 }
 
 int cff_get_t(const cff_t *cff)
 {
+     if (!cff) return -1;
     return cff->t;
 }
 
 int cff_get_n(const cff_t *cff)
 {
+     if (!cff) return -1;
     return cff->n;
 }
 
@@ -121,7 +127,7 @@ cff_t* cff_copy(const cff_t *src)
 // prints a CFF to console
 void cff_print(const cff_t *cff)
 {
-    printf("%u-CFF(%u,%llu):\n", cff->d, cff->t, cff->n);
+    printf("%d-CFF(%d,%lld):\n", cff->d, cff->t, cff->n);
     int value;
     for(int r = 0; r < cff->t; r++)
     {
