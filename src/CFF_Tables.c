@@ -80,7 +80,7 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, intermediate_c
             );
             break;
         case CFF_CONSTRUCTION_ID_FIXED_CFF:
-            cff = get_fixed_cff(d, t);
+            cff = cff_fixed(d, t);
             break;
         case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
             // this can be improved a lot by checking how many ext by ones it will do in advance, then
