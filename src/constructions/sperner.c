@@ -33,7 +33,7 @@ cff_t* cff_sperner(int n)
         {
             if (subset[i] < t && col < n)
             {
-                cff_set_value(cff, subset[i], col, 1);
+                cff_set_matrix_value(cff, subset[i], col, 1);
             }
         }
         col++;

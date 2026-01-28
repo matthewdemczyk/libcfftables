@@ -79,13 +79,13 @@ cff_t* cff_reed_solomon(int p, int exp, int t, int m)
     {
         ln = 0;
         //set * letter
-        cff_set_value(cff, polynomial_coefficients[0], cn, 1);
+        cff_set_matrix_value(cff, polynomial_coefficients[0], cn, 1);
         ln++;
         //evaluate polynomial from polynomial_coefficients with x=i over Fq using horner's method for poly eval
         for (int i = 0; i < m - 1; i++)
         {
             int polynomialSolution = horner_polynomial_eval_over_fq(t, polynomial_coefficients, i, q, addition_field, multiplication_field);
-            cff_set_value(cff, (ln * q) + polynomialSolution, cn, 1);
+            cff_set_matrix_value(cff, (ln * q) + polynomialSolution, cn, 1);
             ln++;
         }
         cn++;

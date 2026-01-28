@@ -44,8 +44,8 @@ cff_t* cff_doubling(const cff_t *cff, int s)
     {
         for (int c = 0; c < cff->n; c++)
         {
-            cff_set_value(resultCFF, r, c, cff_get_value(cff, r, c));
-            cff_set_value(resultCFF, r, c + cff->n, cff_get_value(cff, r, c));
+            cff_set_matrix_value(resultCFF, r, c, cff_get_matrix_value(cff, r, c));
+            cff_set_matrix_value(resultCFF, r, c + cff->n, cff_get_matrix_value(cff, r, c));
         }
     }
 
@@ -83,8 +83,8 @@ cff_t* cff_doubling(const cff_t *cff, int s)
         }
         for (int i = 0; i < s; i++)
         {
-            cff_set_value(resultCFF, i + cff->t, column, char_vector[i]);
-            cff_set_value(resultCFF, i + cff->t, column + cff->n, 1 - char_vector[i]);
+            cff_set_matrix_value(resultCFF, i + cff->t, column, char_vector[i]);
+            cff_set_matrix_value(resultCFF, i + cff->t, column + cff->n, 1 - char_vector[i]);
         }
         column++;
     } while(k_subset_lex_successor(s, ceil_s_over_2, subset));
@@ -94,23 +94,23 @@ cff_t* cff_doubling(const cff_t *cff, int s)
     {
         for (int i = 0; i < cff->n; i++)
         {
-            cff_set_value(resultCFF, cff->t + s, i, 0);
+            cff_set_matrix_value(resultCFF, cff->t + s, i, 0);
         }
         for (int i = cff->n; i < cff->n * 2; i++)
         {
-            cff_set_value(resultCFF, cff->t + s, i, 1);
+            cff_set_matrix_value(resultCFF, cff->t + s, i, 1);
         }
     } else
     {
         for (int i = 0; i < cff->n; i++)
         {
-            cff_set_value(resultCFF, cff->t + s, i, 1);
-            cff_set_value(resultCFF, cff->t + s + 1, i, 0);
+            cff_set_matrix_value(resultCFF, cff->t + s, i, 1);
+            cff_set_matrix_value(resultCFF, cff->t + s + 1, i, 0);
         }
         for (int i = cff->n; i < cff->n * 2; i++)
         {
-            cff_set_value(resultCFF, cff->t + s, i, 0);
-            cff_set_value(resultCFF, cff->t + s+1, i, 1);
+            cff_set_matrix_value(resultCFF, cff->t + s, i, 0);
+            cff_set_matrix_value(resultCFF, cff->t + s+1, i, 1);
         }
     }
     return resultCFF;

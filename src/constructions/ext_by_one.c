@@ -7,6 +7,7 @@
 
 cff_t* cff_extend_by_one(const cff_t* cff)
 {
+    if (cff == NULL) return NULL;
     cff_t *one_by_one_cff = cff_identity(cff->d,1);
     cff_t *result_cff = cff_additive(cff, one_by_one_cff);
     cff_free(one_by_one_cff);

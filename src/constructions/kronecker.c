@@ -23,16 +23,16 @@ cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
     {
         for (int t1 = 0; t1 < right->t; t1++)
         {
-            if (cff_get_value(right, t1, n1) == 1)
+            if (cff_get_matrix_value(right, t1, n1) == 1)
             {
                 // loop over left
                 for (int n2 = 0; n2 < left->n; n2++)
                 {
                     for (int s = 0; s < left->t; s++)
                     {
-                        if (cff_get_value(left, s, n2) == 1)
+                        if (cff_get_matrix_value(left, s, n2) == 1)
                         {
-                            cff_set_value(
+                            cff_set_matrix_value(
                                 product_cff,
                                 (t1*left->t) + s,
                                 (n1*left->n) + n2,

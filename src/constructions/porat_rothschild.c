@@ -36,7 +36,7 @@ cff_t* gen_matrix_to_cff(generator_matrix_t gs)
         for (int codewordPosition = 0; codewordPosition < gs.m; codewordPosition++)
         {
             int codewordLetter = code[codewordPosition][codewordIndex];
-            cff_set_value(cff, (codewordPosition * gs.q) + codewordLetter, codewordIndex, 1);
+            cff_set_matrix_value(cff, (codewordPosition * gs.q) + codewordLetter, codewordIndex, 1);
         }
     }
     return cff;

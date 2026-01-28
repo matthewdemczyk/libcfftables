@@ -73,7 +73,7 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
             }
             for (int i = s; i < m; i++)
             {
-                cff_set_value(cff, ((i - s) * q) + codeword[i], cn, 1);
+                cff_set_matrix_value(cff, ((i - s) * q) + codeword[i], cn, 1);
             }
             cn++;
         }

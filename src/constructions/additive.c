@@ -15,9 +15,9 @@ cff_t* cff_additive(const cff_t *left, const cff_t *right)
     {
         for (int c = 0; c < left->n; c++)
         {
-            if (cff_get_value(left, r, c) == 1)
+            if (cff_get_matrix_value(left, r, c) == 1)
             {
-                cff_set_value(result, r, c, 1);
+                cff_set_matrix_value(result, r, c, 1);
             }
         }
     }
@@ -25,9 +25,9 @@ cff_t* cff_additive(const cff_t *left, const cff_t *right)
     {
         for (int c = 0; c < right->n; c++)
         {
-            if (cff_get_value(right, r, c) == 1)
+            if (cff_get_matrix_value(right, r, c) == 1)
             {
-                cff_set_value(result, r + left->t, c + left->n, 1);
+                cff_set_matrix_value(result, r + left->t, c + left->n, 1);
             }
         }
     }

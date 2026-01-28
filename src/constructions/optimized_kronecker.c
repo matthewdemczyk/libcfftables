@@ -33,15 +33,15 @@ cff_t* cff_optimized_kronecker
     {
         for (int t1 = 0; t1 < kronecker_outer->t; t1++)
         {
-            if (cff_get_value(kronecker_outer, t1, n1) == 1)
+            if (cff_get_matrix_value(kronecker_outer, t1, n1) == 1)
             {
                 for (int n2 = 0; n2 < kronecker_inner->n; n2++) // first inner for loop
                 {
                     for (int s = 0; s < kronecker_inner->t; s++)
                     {
-                        if (cff_get_value(kronecker_inner, s, n2) == 1)
+                        if (cff_get_matrix_value(kronecker_inner, s, n2) == 1)
                         {
-                            cff_set_value(
+                            cff_set_matrix_value(
                                 product_cff,
                                 (t1 * kronecker_inner->t) + s,
                                 (n1 * kronecker_inner->n) + n2,
@@ -60,11 +60,11 @@ cff_t* cff_optimized_kronecker
     {
         for (int c = 0; c < bottom_cff->n; c++)
         {
-            if (cff_get_value(bottom_cff, r, c) == 1)
+            if (cff_get_matrix_value(bottom_cff, r, c) == 1)
             {
                 for (int col_repeat = 0; col_repeat < kronecker_inner->n; col_repeat++)
                 {
-                    cff_set_value(
+                    cff_set_matrix_value(
                         product_cff,
                         r + rows_above,
                         (c*kronecker_inner->n) + col_repeat,

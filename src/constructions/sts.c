@@ -185,7 +185,7 @@ cff_t* cff_sts(int v)
     {
         for (int n = 0; n < 3; n++)
         {
-            cff_set_value(cff, sts->blocks[i][n] - 1, i, 1);
+            cff_set_matrix_value(cff, sts->blocks[i][n] - 1, i, 1);
         }
     }
     free(sts);

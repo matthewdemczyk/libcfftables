@@ -121,6 +121,9 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, intermediate_c
 
 cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
 {
+    if (ctx == NULL) return NULL;
+    if (d > ctx->d_max) return NULL;
+    if (t >= ctx->tables_array[d-1]->numCFFs) return NULL;
     // setup linked list of intermediate CFFs needed in construction
     // so we can free them later without iterating over the entire table
     intermediate_cffs_list_t *head = NULL;
@@ -149,7 +152,9 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t)
 
 cff_t* cff_table_get_by_n(cff_table_ctx_t *ctx, int d, int n)
 {
+    if (ctx == NULL) return NULL;
     int t = binary_search_table(ctx->tables_array[d-1], n);
+    if (t == -1) return NULL;
     return cff_table_get_by_t(ctx, d, t);
 }
 

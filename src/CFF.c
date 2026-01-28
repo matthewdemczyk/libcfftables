@@ -57,7 +57,7 @@ int cff_get_n(const cff_t *cff)
 }
 
 // setter for the row "r" and column "c" for a value in the 0-1 CFF Matrix.
-void cff_set_value(cff_t *cff, int r, int  c, int val)
+void cff_set_matrix_value(cff_t *cff, int r, int  c, int val)
 {
     int bitIndex = r * cff->stride_bits + c;
     if (val)
@@ -70,7 +70,7 @@ void cff_set_value(cff_t *cff, int r, int  c, int val)
 }
 
 // getter for the row "r" and column "c" for a value in the 0-1 CFF Matrix.
-int cff_get_value(const cff_t *cff, int r, int c)
+int cff_get_matrix_value(const cff_t *cff, int r, int c)
 {
     int bitIndex = r * cff->stride_bits + c;
     return (cff->matrix[bitIndex / 8] >> (bitIndex % 8)) & 1;
@@ -98,7 +98,7 @@ cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix)
     {
         for(int c  = 0; c < n; c++)
         {
-            cff_set_value(cff, r, c, matrix[r *n + c]);
+            cff_set_matrix_value(cff, r, c, matrix[r *n + c]);
         }
     }
     return cff;
@@ -115,8 +115,8 @@ cff_t* cff_copy(const cff_t *src)
     {
         for(int c = 0; c < src->n; c++)
         {
-            cff_set_value(cff,r,c,
-                cff_get_value(src,r,c)
+            cff_set_matrix_value(cff,r,c,
+                cff_get_matrix_value(src,r,c)
             );
         }
     }
@@ -133,7 +133,7 @@ void cff_print(const cff_t *cff)
     {
         for(int c = 0; c < cff->n; c++)
         {
-            value = cff_get_value(cff, r, c);
+            value = cff_get_matrix_value(cff, r, c);
             if (value)
             {
                 printf("1 ");
@@ -153,7 +153,7 @@ void cff_write(const cff_t *cff, FILE *file)
     {
         for(int c = 0; c < cff->n; c++)
         {
-            value = cff_get_value(cff,r,c);
+            value = cff_get_matrix_value(cff,r,c);
             if (value)
             {
                 fprintf(file, "1");
@@ -215,7 +215,7 @@ bool cff_verify(const cff_t *cff)
             for (int c = 0; c < k; c++)
             {
                 // if the current cell is 1:
-                if (cff_get_value(cff, r, cols[c]) == 1)
+                if (cff_get_matrix_value(cff, r, cols[c]) == 1)
                 { // record the position of the column and increment row sum
                     e = c;
                     s++;

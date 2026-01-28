@@ -35,17 +35,17 @@ void test_cff_null_free()
 
 
 /*
-    Test that cff_set_value and cff_get_value work
+    Test that cff_set_matrix_value and cff_get_matrix_value work
 */
 void test_cff_set_get()
 {
     puts("Running test_cff_set_get...\n");
     cff_t *cff = cff_alloc(2, 10, 10);
-    cff_set_value(cff, 0, 0, 1);
+    cff_set_matrix_value(cff, 0, 0, 1);
     cff_print(cff);
-    assert(cff_get_value(cff, 0, 0) == 1);
+    assert(cff_get_matrix_value(cff, 0, 0) == 1);
     //check other values are still zero
-    assert(cff_get_value(cff, 1, 1) == 0);
+    assert(cff_get_matrix_value(cff, 1, 1) == 0);
     cff_free(cff);
     puts("OK test_cff_set_get passed\n");
 }
@@ -71,21 +71,21 @@ void test_cff_verify_2()
     puts("Running test_cff_verify_2...\n");
     cff_t *cff = cff_alloc(1, 4, 6);
     //set cff to sperner system for t=4
-    cff_set_value(cff, 0, 0, 1);
-    cff_set_value(cff, 0, 1, 1);
-    cff_set_value(cff, 0, 2, 1);
+    cff_set_matrix_value(cff, 0, 0, 1);
+    cff_set_matrix_value(cff, 0, 1, 1);
+    cff_set_matrix_value(cff, 0, 2, 1);
 
-    cff_set_value(cff, 1, 0, 1);
-    cff_set_value(cff, 1, 3, 1);
-    cff_set_value(cff, 1, 4, 1);
+    cff_set_matrix_value(cff, 1, 0, 1);
+    cff_set_matrix_value(cff, 1, 3, 1);
+    cff_set_matrix_value(cff, 1, 4, 1);
 
-    cff_set_value(cff, 2, 1, 1);
-    cff_set_value(cff, 2, 3, 1);
-    cff_set_value(cff, 2, 5, 1);
+    cff_set_matrix_value(cff, 2, 1, 1);
+    cff_set_matrix_value(cff, 2, 3, 1);
+    cff_set_matrix_value(cff, 2, 5, 1);
 
-    cff_set_value(cff, 3, 2, 1);
-    cff_set_value(cff, 3, 4, 1);
-    cff_set_value(cff, 3, 5, 1);
+    cff_set_matrix_value(cff, 3, 2, 1);
+    cff_set_matrix_value(cff, 3, 4, 1);
+    cff_set_matrix_value(cff, 3, 5, 1);
     cff_print(cff);
     assert(cff_verify(cff));
     cff_free(cff);
@@ -103,7 +103,7 @@ void test_cff_verify_3()
     {
         for (int j = 0; j < 10; j++)
         {
-            cff_set_value(cff, i, j, 1);
+            cff_set_matrix_value(cff, i, j, 1);
         }
     }
     cff_print(cff);
@@ -136,7 +136,7 @@ void test_cff_verify_4()
     // Create a minimal valid 2-CFF(4,3)
     for (int i = 0; i < 3; i++)
     {
-        cff_set_value(cff, i, i, 1);
+        cff_set_matrix_value(cff, i, i, 1);
     }
     assert(cff_verify(cff) == true);
     cff_free(cff);
@@ -193,7 +193,7 @@ void test_cff_copy() {
     cff_t *cff = cff_alloc(2, 6, 6);
     for (int i = 0; i < 6; i++)
     {
-        cff_set_value(cff, i, i, 1);
+        cff_set_matrix_value(cff, i, i, 1);
     }
     cff_t *copy_of_cff = cff_copy(cff);
     assert(cff_verify(copy_of_cff));
@@ -209,8 +209,8 @@ void test_cff_copy() {
 void test_cff_write() {
     puts("Running test_cff_write...\n");
     cff_t *cff = cff_alloc(1, 2, 3);
-    cff_set_value(cff, 0, 0, 1);
-    cff_set_value(cff, 1, 2, 1);
+    cff_set_matrix_value(cff, 0, 0, 1);
+    cff_set_matrix_value(cff, 1, 2, 1);
 
     FILE *f = fopen("cff_test_output.txt", "w");
     cff_write(cff, f);
