@@ -9,7 +9,8 @@
  *
  * A cover-free family, denoted `d-CFF(t,n)` is a set system where the ground set has `t` elements,
  * the set system contains `n` subsets, and no subset is contained in the union
- * of any `d` other subsets. Cover-free families are also known as d-disjunct matrices.
+ * of any `d` other subsets. d-cover-free families are also known as d-disjunct matrices. For more information
+ * see https://en.wikipedia.org/wiki/Disjunct_matrix .
  *
  * The main feature of this library is the ability to provide a `(d,n)` and construct a CFF that minimizes
  * `t`, or provide a `(d,t)` and construct a CFF that maximizes `n` from our selection of CFF constructions.
@@ -102,7 +103,7 @@ extern "C" {
  * Cells of the incidence matrix can be read with `cff_get_matrix_value()`
  * or written to with `cff_set_matrix_value()`, where `value = 0, 1`.
  *
- * A `cff_t` must be initialized functions such as
+ * A `cff_t` must be initialized with functions such as
  * `cff_alloc()`, `cff_from_matrix()`, one of the construction routines,
  * or with `cff_table_get_by_t()`/`cff_table_get_by_n()` after initializing
  * a `cff_table_ctx_t` with `cff_table_create()`.
@@ -232,7 +233,7 @@ void cff_set_matrix_value(cff_t *cff, int r, int  c, int val);
 /**
  * @brief Prints a `cff_t` to stdin.
  *
- * The fill first print `d-CFF(t,n)` where `d`,`t`,`n` are read from the `cff_t`.
+ * The will first print `d-CFF(t,n)` where `d`,`t`,`n` are read from the `cff_t`.
  * The zeros of the CFF are printed as a `-` instead of `0`.
  *
  * @par Example:
