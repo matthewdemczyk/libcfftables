@@ -1,0 +1,7 @@
+cff-version: 1.0.0
+title: "libcfftables"
+authors:
+  - family-names: Matthew
+    given-names: Demczyk
+date-released: 2026
+license: MIT
