@@ -1,6 +1,5 @@
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://matthewdemczyk.github.io/libcfftables/)
-![Build Status](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yml/badge.svg)
-![Coverage](https://img.shields.io/endpoint?url=https://matthewdemczyk.github.io/REPO/badges/coverage.json)
+![Build and Test](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml/badge.svg)
 
 ## Licensing
 
