@@ -1,0 +1,101 @@
+name: Build and Test
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup Miniconda
+      uses: conda-incubator/setup-miniconda@v3
+      with:
+        auto-update-conda: true
+        python-version: "3.11"
+        channels: conda-forge
+        channel-priority: strict
+
+    - name: Install dependencies
+      shell: bash -el {0}
+      run: |
+        conda install -c conda-forge libflint gcovr cmake make
+
+    - name: Configure CMake
+      shell: bash -el {0}
+      run: |
+        mkdir -p build
+        cd build
+        cmake .. -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_FLAGS="--coverage"
+
+    - name: Build
+      shell: bash -el {0}
+      run: |
+        cd build
+        make
+
+    - name: Run tests
+      shell: bash -el {0}
+      run: |
+        cd build
+        ctest --output-on-failure
+
+    - name: Generate coverage report
+      shell: bash -el {0}
+      run: |
+        cd build
+        gcovr -r .. \
+          --filter '.*/src/.*\.c$' \
+          --html --html-details -o coverage.html \
+          --json -o coverage.json
+
+    - name: Upload coverage report
+      uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: coverage-report-${{ matrix.os }}
+        path: build/coverage*.html
+
+    # Only create badge from Ubuntu run on main branch
+    - name: Create coverage badge
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      shell: bash -el {0}
+      run: |
+        cd build
+        COVERAGE=$(python3 -c "import json; print(round(json.load(open('coverage.json'))['line_percent'], 1))")
+        echo "Coverage: $COVERAGE%"
+
+        # Determine color
+        if (( $(echo "$COVERAGE >= 80" | bc -l) )); then
+          COLOR="brightgreen"
+        elif (( $(echo "$COVERAGE >= 60" | bc -l) )); then
+          COLOR="yellow"
+        else
+          COLOR="red"
+        fi
+
+        # Create badge JSON
+        mkdir -p badges
+        cat > badges/coverage.json << EOF
+        {
+          "schemaVersion": 1,
+          "label": "coverage",
+          "message": "${COVERAGE}%",
+          "color": "$COLOR"
+        }
+        EOF
+
+    - name: Upload coverage badge
+      if: matrix.os == 'ubuntu-latest' && github.event_name == 'push' && github.ref == 'refs/heads/main'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-badge
+        path: build/badges/
