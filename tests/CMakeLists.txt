@@ -5,6 +5,8 @@ file(GLOB TEST_SOURCES CONFIGURE_DEPENDS
     "${CMAKE_CURRENT_SOURCE_DIR}/*.c"
     "${CMAKE_CURRENT_SOURCE_DIR}/construction_tests/*.c"
 )
+# Make a test output folder
+file(MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/test_output)
 
 foreach(test_src ${TEST_SOURCES})
     # Get filename without extension (e.g. test_cff.c -> test_cff)
