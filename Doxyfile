@@ -22,8 +22,8 @@ HIDE_UNDOC_MEMBERS     = YES
 HIDE_UNDOC_CLASSES     = YES
 
 # Better organization
-SORT_MEMBER_DOCS       = YES
-SORT_BRIEF_DOCS        = YES
+SORT_MEMBER_DOCS       = NO
+SORT_BRIEF_DOCS        = NO
 
 # Show source code
 SOURCE_BROWSER         = YES
@@ -33,4 +33,3 @@ INLINE_SOURCES         = YES
 GENERATE_TREEVIEW      = YES
 TREEVIEW_WIDTH         = 250
 DISABLE_INDEX          = NO
-FULL_SIDEBAR           = NO

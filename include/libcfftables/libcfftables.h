@@ -9,22 +9,26 @@
  *
  * A cover-free family, denoted `d-CFF(t,n)` is a set system where the ground set has `t` elements,
  * the set system contains `n` subsets, and no subset is contained in the union
- * of any `d` other subsets.
+ * of any `d` other subsets. Cover-free families are also known as d-disjunct matrices.
+ *
+ * The main feature of this library is the ability to provide a `(d,n)` and construct a CFF that minimizes
+ * `t`, or provide a `(d,t)` and construct a CFF that maximizes `n` from our selection of CFF constructions.
  *
  * The tables that this library will generate are available at https://matthewdemczyk.github.io/CFFtables/
+ * for values up to n=100 trillion and d=25. This library can generate larger values though.
  *
  * @section usage_sec Basic Usage
  *
  * To use the library:
- * 1. Create a CFF using one of the construction functions or the table API
- * 2. Manipulate or verify the CFF using the provided operations
- * 3. Free the CFF when done
+ * 1. Initialize the CFF tables up to some maximum values, and construct a CFF from these tables
+ * 2. Read the cells of the CFF's incidence matrix, for use in your application
+ * 3. Free the CFF and tables when done
  *
  * Example:
  * @code
  * #include <libcfftables/libcfftables.h>
  *
- * int main(){
+ * int main() {
  *     // Initialize the tables by providing max d=3, t=100, n=2000 values allowed
  *     cff_table_ctx_t *ctx = cff_table_create(3, 100, 2000);
  *
@@ -37,11 +41,11 @@
  *     // ...your CFF application code here!...
  *     cff_print(cff);
  *
- *     // iterate over the rows of the CFF:
- *     for (int r = 0; r < t; r++) {
- *         // iterate over the columns of the CFF:
- *         for (int c = 0; c < n; c++) {
- *             int cell = cff_get_value(cff, r, c);
+ *     // Iterate over the rows of the CFF's incidence matrix:
+ *     for (int row = 0; row < t; row++) {
+ *         // Iterate over the columns of the CFF's incidence matrix:
+ *         for (int col = 0; col < n; col++) {
+ *             int cell = cff_get_matrix_value(cff, row, col);
  *             // ...do something with the cell here...
  *         }
  *     }
@@ -57,7 +61,7 @@
  * The API is organized into several groups:
  * - Core CFF Operations: Manipulation for a constructed CFF, including reading cells of its incidence matrix.
  * - Table Generation: Best-known CFF lookup tables. This will constrct a CFF that maximizes
- * `n` for a given `(d,t)` or minimizes `t` for a given `(d,n)`
+ * `n` for a given `(d,t)` or minimizes `t` for a given `(d,n)` from our selection of construcitons.
  * - Construction Algorithms: Various methods to construct CFFs.
  * Only useful if you need a CFF from a specific construction for some reason. Otherwise use the tables.
  */
@@ -91,19 +95,19 @@ extern "C" {
  *
  * A cover-free family is stored as an incidenc matrix with `t` rows and `n` columns.
  *
- * The functions `cff_get_d(cff)`, `cff_get_t(cff)`, `cff_get_n(cff)`, can be
+ * The functions `cff_get_d()`, `cff_get_t()`, `cff_get_n()`, can be
  * used to read the `d`,`t`, and `n` of the CFF. The `d` can be changed with
- * `cff_set_d(cff, d)`.
+ * `cff_set_d()`.
  *
- * Cells of the incidence matrix can be read with `cff_get_value(cff, row, col)`
- * or written to with `cff_set_value(cff, row, call, value)`, where `value = 0, 1`.
+ * Cells of the incidence matrix can be read with `cff_get_matrix_value()`
+ * or written to with `cff_set_matrix_value()`, where `value = 0, 1`.
  *
  * A `cff_t` must be initialized functions such as
- * `cff_alloc`, `cff_from_matrix`, one of the construction routines,
- * or with `cff_table_get_by_t`/`cff_table_get_by_n` after initializing
- * a `cff_table_ctx_t` with `cff_table_create`.
+ * `cff_alloc()`, `cff_from_matrix()`, one of the construction routines,
+ * or with `cff_table_get_by_t()`/`cff_table_get_by_n()` after initializing
+ * a `cff_table_ctx_t` with `cff_table_create()`.
  *
- * A `cff_t` must be released with `cff_free(cff)`, regardless of method
+ * A `cff_t` must be released with `cff_free()`, regardless of method
  * of initialization.
  *
  * All access to a `cff_t` is performed through the provided API
@@ -127,7 +131,10 @@ cff_t* cff_alloc(int d, int t, long long n);
 /**
  * @brief Frees a `cff_t` from memory.
  *
- * @param cff The `cff_t` to free.
+ * @param cff The `cff_t` to free. May be NULL (no-op).
+ *
+ * @post The memory pointed to by `cff` is freed and the pointer
+ * becomes invalid. Caller should not use it afterward.
  */
 void cff_free(cff_t *cff);
 /**
@@ -143,7 +150,7 @@ void cff_free(cff_t *cff);
  *
  * @returns A pointer to a newly allocated `d-CFF(t,n)` with cells set from `matrix`, or NULL on failure.
  *
- * @note After running the user retains ownership of `matrix`. This function makes a deep copy.
+ * @note After running, the user retains ownership of `matrix`. This function makes a deep copy.
  */
 cff_t* cff_from_matrix(int d, int t, long long n, const int *matrix);
 /**
@@ -159,21 +166,21 @@ cff_t* cff_copy(const cff_t *src);
  *
  * @param cff The CFF to get `d` from.
  *
- * @return The `d` of `cff`, or `-1` if `cff` is `NULL`
+ * @return The `d` of `cff`, or `-1` if `cff` is `NULL`.
  */
 int cff_get_d(const cff_t *cff);
 /**
  * @brief Getter for a `cff_t`'s `t`, the number of rows of its incidence matrix.
  *
  * @param cff The CFF to get `t` from.
- * @return The `t` of the `cff_t`.
+ * @return The `t` of the `cff_t`, or `-1` if `cff` is `NULL`
  */
 int cff_get_t(const cff_t *cff);
 /**
  * @brief Getter for a `cff_t`'s `n`, the number of columns of its incidence matrix.
  *
  * @param cff The CFF to get `n` from.
- * @return The `n` of the `cff_t`.
+ * @return The `n` of the `cff_t`, or `-1` if `cff` is `NULL`.
  */
 int cff_get_n(const cff_t *cff);
 /**
@@ -182,46 +189,64 @@ int cff_get_n(const cff_t *cff);
  * This function can be useful to check if a `d-CFF` is a `(d+1)-CFF`
  * by using `cff_verify()` after this function.
  *
- * @param cff A pointer to the CFF whose `d` will be changed
- * @param d The new `d` value for `cff`
+ * @param cff A pointer to the CFF whose `d` will be changed.
+ * @param d The new `d` value for `cff`.
+ *
+ * @post If `cff` is not NULL, its `d` is updated to the passed value. If `cff` is NULL, nothing will happen.
  */
 void cff_set_d(cff_t *cff, int d);
 /**
- * @brief Sets one of the cells in a `cff_t`'s incidence matrix to zero or one
+ * @brief Getter for one cell of a `cff_t`'s incidence matrix.
  *
  * @warning The user must ensure that `cff` is not `NULL` before calling this. There is no check
  * inside of the function that does this. The user must also ensure:
- * `0 <= c < cff_get_n(cff)` and `0 <= r < cff_get_t(t)` to avoid reading out of bounds.
+ * `0 <= c < cff_get_n(cff)` and `0 <= r < cff_get_t(cff)` to avoid reading out of bounds.
  *
- * @param cff A pointer to the CFF to set a value in
- * @param r The row of `cff`'s incidence matrix to set
- * @param c The column of `cff`'s incidence matrix to set
- * @param val The value, either `0` or `1`, to set the cell of the incidence matrix to
+ * @param cff The CFF to get a cell's value from.
+ * @param r The row of `cff`'s incidence matrix to get.
+ * @param c The column of `cff`'s incidence matrix to get.
  *
- * @pre `value` = `0` or `1`
- * @pre `0 <= c < cff_get_n(cff)`
- * @pre `0 <= r < cff_get_t(t)`
+ * @pre `cff` is not NULL.
+ * @pre `0 <= c < cff_get_n(cff)`.
+ * @pre `0 <= r < cff_get_t(cff)`.
  */
-void cff_set_value(cff_t *cff, int r, int  c, int val);
+int cff_get_matrix_value(const cff_t *cff, int r, int c);
 /**
- * @brief Getter for one cell of a `cff_t`'s incidence matrix
+ * @brief Sets one of the cells in a `cff_t`'s incidence matrix to zero or one.
  *
  * @warning The user must ensure that `cff` is not `NULL` before calling this. There is no check
  * inside of the function that does this. The user must also ensure:
- * `0 <= c < cff_get_n(cff)` and `0 <= r < cff_get_t(t)` to avoid reading out of bounds.
+ * `0 <= c < cff_get_n(cff)` and `0 <= r < cff_get_t(cff)` to avoid reading out of bounds.
  *
- * @param cff The CFF to get a cell's value from
- * @param r The row of `cff`'s incidence matrix to get
- * @param c The column of `cff`'s incidence matrix to get
+ * @param cff A pointer to the CFF to set a value in.
+ * @param r The row of `cff`'s incidence matrix to set.
+ * @param c The column of `cff`'s incidence matrix to set.
+ * @param val The value, either `0` or `1`, to set the cell of the incidence matrix to.
+ *
+ * @pre `cff` is not NULL.
+ * @pre `value` = `0` or `1`.
+ * @pre `0 <= c < cff_get_n(cff)`.
+ * @pre `0 <= r < cff_get_t(cff)`.
  */
-int cff_get_value(const cff_t *cff, int r, int c);
+void cff_set_matrix_value(cff_t *cff, int r, int  c, int val);
 /**
  * @brief Prints a `cff_t` to stdin.
  *
  * The fill first print `d-CFF(t,n)` where `d`,`t`,`n` are read from the `cff_t`.
  * The zeros of the CFF are printed as a `-` instead of `0`.
  *
- * @param cff A pointer to the cff that will be printed
+ * @par Example:
+ * @code
+ * cff_t *cff = cff_sperner(6);
+ * cff_print(cff);
+ * // Output:
+ * // 1-CFF(4,6):
+ * // 1 1 1 - - -
+ * // 1 - - 1 1 -
+ * // - 1 - 1 - 1
+ * // - - 1 - 1 1
+ * @endcode
+ * @param cff A pointer to the CFF that will be printed.
  */
 void cff_print(const cff_t *cff);
 /**
@@ -232,7 +257,7 @@ void cff_print(const cff_t *cff);
  */
 void cff_write(const cff_t *cff, FILE *file);
 /**
- * @brief Verify if a `cff_t` is a valid CFF
+ * @brief Verify if a `cff_t` is a valid CFF.
  *
  * This function iterates of all n choose d+1 subset of columns an ensures that
  * each 1-weight d+1 size tuple is present in each subset of columns.
@@ -249,7 +274,7 @@ bool cff_verify(const cff_t *cff);
  * ============================================================================ */
 /**
  * @defgroup tables Table Generation
- * @brief Best-known CFF lookup tables
+ * @brief Best-known (from our selection of constructions) CFF lookup tables
  * @{
  */
 /**
@@ -260,8 +285,10 @@ bool cff_verify(const cff_t *cff);
  * Best-known cover-free familiy means that for a given
  * `(d,n)`, `t` is minimized, or for a given `(d,t)`, `n` is maximized.
  *
+ * A `cff_table_ctx_t` is initialized with the function `cff_table_create()`.
+ *
  * The purpose of initializing this is to be able to use the functions
- * `cff_table_get_by_t` and `cff_table_get_by_n`, which will construct a CFF.
+ * `cff_table_get_by_t()` and `cff_table_get_by_n()`, which will construct a CFF.
  */
 typedef struct cff_table_ctx cff_table_ctx_t;
 /**
@@ -292,24 +319,66 @@ cff_table_ctx_t* cff_table_create(int d_maximum, int t_maximum, long long n_maxi
  * initialized with `cff_table_create()`.
  *
  * @param ctx The `cff_table_ctx_t` to free
+ *
+ * @post The memory pointed to by `ctx` is freed and the pointer
+ * becomes invalid. Caller should not use it afterward.
  */
 void cff_table_free(cff_table_ctx_t *ctx);
 /**
  * @brief Construct a CFF by supplying the desired `d` and `t`.
  *
  * This function will construct a best-known CFF by consulting the CFF tables
- * to know which construction to use.
+ * to know which construction to use. Best-known means maximizing `n` for the
+ * given `(d,t)`
  *
  * @param ctx The CFF tables. Must be initialized with `cff_table_create()`.
  * @param d The `d` of the CFF.
  * @param t The number of rows of the desired CFF.
+ *
+ * @pre The values `d` and `t` appear in the tables.
+ *
+ * @return A pointer to a `cff_t` constructed from the tables with the given `d` and `t` values or NULL on failure.
+ *
+ * @note A user has ownership of the returned CFF and must free it themselves with `cff_free()`.
  */
 cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t);
 
-// uses getByT to get a cff
+/**
+ * @brief Construct a CFF by supplying the desired `d` and `n`.
+ *
+ * This function will construct a best-known CFF by consulting the CFF tables
+ * to know which construction to use. Best-known means minimizing `t` for the
+ * given `(d,n)`.
+ *
+ * @param ctx The CFF tables. Must be initialized with `cff_table_create()`.
+ * @param d The `d` of the CFF.
+ * @param n The number of columns of the desired CFF.
+ *
+ * @pre The values `d` and `n` appear in the tables.
+ *
+ * @return A pointer to a `cff_t` constructed from the tables with the given `d` and `n` values or NULL on failure.
+ *
+ * @note A user has ownership of the returned CFF and must free it themselves with `cff_free()`.
+ */
 cff_t* cff_table_get_by_n(cff_table_ctx_t *ctx, int d, int n);
 
-// makes csv files in ./tables/ from global_tables_array
+/**
+ * @brief Write the contents of the tables to CSV files.
+ *
+ * This function will make a file called d_1.csv, d_2.csv, up to the largest d in the tables,
+ * Where each row of the CSV has the n of the resulting CFF, the construction name used,
+ * and the parameters to the construction necessary to obtain this CFF. The `t` of the CFF is
+ * the row number, so this number is not directly written to the CSV.
+ *
+ * @warning The user must ensure that `ctx` is not NULL before calling this function, and the
+ * user must ensure that `folder_path` is a valid folder on the file system.
+ *
+ * @param ctx The `cff_table_ctx_t` to write to CSVs.
+ * @param folder_path The path to write the various CSVs to. Can be a relative path.
+ *
+ * @pre `ctx` is not NULL.
+ * @pre `folder_path` is an existing folder in the file system.
+ */
 void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path);
 /** @} */ // end of tables group
 
@@ -326,42 +395,176 @@ void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path);
  *
  * @param d The `d` of the CFF. Must be positive and less than `n`.
  * @param n Number of rows and cols in the resulting CFF, must be positive and greater than `d`.
+ * @pre `d<n`.
  * @return Pointer to a `d-CFF(n,n)`, or NULL on failure.
  */
 cff_t* cff_identity(int d, int n);
 /**
- * @brief Constructs a CFF from a Sperner system.
+ * @brief Constructs a 1-CFF from a Sperner system.
  *
- * @param n Number of subsets in the sperner system/CFF
- * @return Pointer to newly allocated `1-CFF(t = min{s : choose(s, s/2) >= n }, n)`, or `NULL` on failure
+ * @param n Number of subsets in the sperner system/CFF.
+ * @return Pointer to newly allocated `1-CFF(t = min{s : choose(s, s/2) >= n }, n)`, or `NULL` on failure.
  */
 cff_t* cff_sperner(int n);
 /**
  * @brief Constructs a 2-CFF from a Steiner Triple System.
  *
- * @param v Order of the STS
+ * @param v Order of the STS.
  *
  * @pre v is congruent to 1,3 mod 6.
  *
- * @returns Pointer to a `2-CFF(v, (v * (v - 1)) / 6)`, or `NULL` on failure
+ * @returns Pointer to a `2-CFF(v, (v * (v - 1)) / 6)`, or `NULL` on failure.
  */
 cff_t* cff_sts(int v);
 /**
- * TODO
+ * @brief Gets one of the hardcoded fixed CFFs.
+ *
+ * The hardcoded CFFs are only for `d = 2` and `t = 10 ... 23`.
+ *
+ * @param d The `d` of the fixed CFF.
+ * @param t The `t` of the fixed CFF.
+ *
+ * @pre d = 2.
+ * @pre 10 >= t >= 23.
+ *
+ * @return A pointer to a newly copied fixed CFF, or NULL on failure. The user gains ownersip of
+ * this and must free it after use with `cff_free()`.
+ */
+cff_t* cff_fixed(int d, int t);
+/**
+ * @brief Constructs a CFF from a Reed-Solomon error correcting code.
+ *
+ * The alphabet for the Reed-Solomon code will be size `q=p^exp`, message vector length
+ * will be t, and codeword size will be `m`.
+ *
+ * @param p The prime of the alphabet.
+ * @param exp The power of the alphabet.
+ * @param t Message length of the Reed-Solomon code.
+ * @param m Codeword size of the Reed-Solomon code.
+ *
+ * @pre `p` is prime.
+ * @pre `exp` > 0.
+ * @pre m <= (p^exp)+1.
+ * @pre q >= t - 1 >= 0.
+ *
+ * @warning The caller must ensure the preconditions are true before calling this function, or there may
+ * be undefined behaviour.
+ *
+ * @return Pointer to a `((m - 1) / (t + 1))-CFF(m*(p^exp), (p^exp)^t)`, or NULL on failure.
+ */
+cff_t* cff_reed_solomon(int p, int exp, int t, int m);
+/**
+ * @brief Constructs a CFF from a shortened Reed-Solomon error correcting code.
+ *
+ * The alphabet for the Reed-Solomon code will be size `q=p^exp`, message vector length
+ * will be t, and codeword size will be `m`, and the code is shortened `s` times.
+ *
+ * @param p The prime of the alphabet.
+ * @param exp The power of the alphabet.
+ * @param t Message length of the Reed-Solomon code.
+ * @param m Codeword size of the Reed-Solomon code.
+ * @param s Number of times to shorten the code.
+ *
+ * @pre `p` is prime.
+ * @pre `exp` > 0.
+ * @pre m <= (p^exp)+1
+ * @pre q >= t - 1 >= 0.
+ * @pre 0 < s < m.
+ *
+ * @warning The caller must ensure the preconditions are true before calling this function, or there may
+ * be undefined behaviour.
+ *
+ * @return Pointer to a `(((m-s) - 1) / ((t-s) + 1))-CFF((m-s)*(p^exp), (p^exp)^(t-s))`, or NULL on failure.
+ */
+cff_t* cff_short_reed_solomon(int p, int exp, int t, int m, int s);
+/**
+ * @brief Constructs a CFF using Porat and Rothschild's probabilistic linear error correcting code construction.
+ *
+ * See https://arxiv.org/abs/0712.3876 for more details.
+ *
+ * @note The CFFs from Reed-Solomon codes and others are better than this construction until `n`
+ * grows extremely large (around `n = 2^370`), so this construction is not really used.
+ *
+ * @param p The prime of the code's alphabet `q = p^a`.
+ * @param a The power of the prime's alphabet `q = p^a`.
+ * @param k The message length of the code.
+ * @param r The `d` of the desired CFF + 1 (so if you want a 3-CFF, r=4).
+ * @param m The codeword length of the code. Set to zero to calculate the best possible allowed by the theorem.
+ *
+ * @pre `p` is prime.
+ * @pre `a` > 0.
+ * @pre m > k.
+ * @pre `2r <= p^a < 4r.
+ *
+ * @return A pointer to a `cff_t`, a `(r-1)-CFF(m*(p^a),(p^a)^k)`, or NULL on failure.
+ * @note Sometimes when reducing `m` to values smaller than the theorem allows, this still produces valid CFFs.
+ * If this is done, it may become better than other constructions sooner than `n = 2^370`.
  */
 cff_t* cff_porat_rothschild(int p, int a, int k, int r, int m);
 /**
- * @brief Constructs a CFF from a Reed-Solomon error correcting code
+ * @brief A recursive construction that returns a new CFF with `t` and `n` increased by one.
+ *
+ * @param cff A pointer to a `cff_t`. Must be not NULL.
+ * @return A pointer to a newly allocated `cff_t` with 1 larger `t` and `n` than the passed CFF.
+ * @note The user retains ownership of the passed CFF and can free it without affecting the returned CFF.
  */
-cff_t* cff_reed_solomon(int p, int exp, int t, int m);
-cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s);
-cff_t* cff_fixed(int d, int t);
-
-// recursive constructions
-cff_t* cff_additive(const cff_t *left, const cff_t *right);
-cff_t* cff_doubling(const cff_t *cff, int s);
-cff_t* cff_kronecker(const cff_t *left, const cff_t *right);
 cff_t* cff_extend_by_one(const cff_t *cff);
+/**
+ * @brief A recursive construction that will make a new CFF with their `t` values added and their `n` values added together.
+ *
+ * For a given `d-CFF(t1,n1)` and `d-CFF(t2,n2)`, this function will return a `d-CFF(t1+t2,n1+n2)`.
+ *
+ * @param left The first `cff_t` to add.
+ * @param right The other `cff_t` to add.
+ *
+ * @pre The `d` of the two CFFs is the same.
+ *
+ * @returns A pointer to the newly allocated constructed CFF.
+ *
+ * @note The user retains ownership of the passed CFFs and can free them without affecting the result CFF.
+ */
+cff_t* cff_additive(const cff_t *left, const cff_t *right);
+/**
+ * @brief Recursive construction for `d=2` that doubles the number of columns in a CFF.
+ *
+ * @param cff The `cff_t` to double.
+ * @param s An integer satisfying s = min{s : choose(s, s/2) > cff_get_n(cff)}.
+ *
+ * @pre `s = min{s : choose(s, s/2) > cff_get_n(cff)}`.
+ * @pre `cff_get_d(cff) = 2`
+ * @warning The user must ensure the precondition on `s` is satisfied, there is no check inside the function.
+ * @return A 2-CFF with double the columns as the passed 2-CFF, or NULL on failure.
+ * @note The user retains ownership of the passed CFFs and can free them without affecting the result CFF.
+ */
+cff_t* cff_doubling(const cff_t *cff, int s);
+/**
+ * @brief A recursive construction that is the Kronecker product of two CFFs.
+ *
+ * For a given `d-CFF(t1,n1)` and `d-CFF(t2,n2)`, this function will return a `d-CFF(t1*t2,n1*n2)`.
+ * See https://en.wikipedia.org/wiki/Kronecker_product for info.
+ *
+ * @param left The `cff_t` that is the left operand to a Kronecker product.
+ * @param right The `cff_t` that is the right operand to a Kronecker product.
+ *
+ * @pre The `d` of the two CFFs is the same.
+ *
+ * @return A pointer to a `cff_t` that is the Kronecker product of the two CFFs, or NULL on failure.
+ * @note The user retains ownership of the passed CFFs and can free them without affecting the result CFF.
+ */
+cff_t* cff_kronecker(const cff_t *left, const cff_t *right);
+/**
+ * @brief Constructs the optimized Kronecker product for three given CFFs.
+ *
+ * For a given `(d-1)-CFF(s, n2)`, `d-CFF(t1, n1)`, and a `d-CFF(t2, n2)`, this will construct a
+ * `d-CFF(s*t1, n1*n2)`.
+ *
+ * @param kronecker_outer A pointer to a `cff_t` (d-1)-CFF(s,  n2).
+ * @param kronecker_inner A pointer to a `cff_t` d-CFF(t1, n1).
+ * @param bottom_cff A pointer to a `cff_t` d-CFF(t2, n2).
+ *
+ * @return A pointer to a `cff_t` d-CFF(s*t1, n1*n2), or NULL on failure.
+ * @note The user retains ownership of the passed CFFs and can free them without affecting the result CFF.
+ */
 cff_t* cff_optimized_kronecker
 (
     const cff_t *kronecker_outer, // (d-1)-CFF(s,  n2)
