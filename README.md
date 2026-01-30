@@ -6,7 +6,9 @@
 
 This is a C library for constructing $d$-Cover-Free Families (CFFs). A $d$-CFF($t,n$) is a set system where the ground set has $t$ elements, the set system has $n$ subsets, and no subset is contained in the union of any other $d$ subsets.
 
-It's generally desirable to maximize the number of subsets for a given ground set while maintaining the cover-free property. This library will select the best CFF construct that's implemented in the library to do so for the specific $d$ and $t$. There is also an option to provide a specific $d$ and $n$ to minimize $t$.
+It's generally desirable to maximize the number of subsets for a given ground set while maintaining the cover-free property. This library selects the best available CFF construction implemented in the library to do so. "Best" here means maximizing $n$ for fixed $(d,t)$, or minimizing $t$ for fixed $(d,n)$, based on known constructions.
+
+This library stores cover-free families as $0-1$ incidence matrices, using a bitfield. When a $d$-cover-free family is viewed as an incidence matrix it is equivalent to a $d$-disjunct matrix.
 
 ## Basic usage
 The main feature of this library is the ability to provide a $(d,n)$ and construct a CFF that minimizes $t$, or provide a $(d,t)$ and construct a CFF that maximizes $n$ from our selection of CFF constructions.
@@ -46,6 +48,105 @@ int main() {
     cff_table_free(ctx);
 }
 ```
+
+## Tables of CFFs used
+
+The tables that the library will generate and use are available here: https://matthewdemczyk.github.io/CFFtables/
+
+These precomputed tables go up to $n=100$ trillion and $d=25$. The library can generate tables for larger values. The tables are not hardcoded and are generated dynamically up to the arguments provided to `cff_table_create()`.
+
+## Documentation
+
+Full API documentation is available at: https://matthewdemczyk.github.io/libcfftables/
+
+To build documentation locally:
+```bash
+doxygen Doxyfile
+# Open docs/html/index.html in your browser
+```
+
+## Prerequisites
+
+**Supported Platforms:** Linux, macOS
+
+**Note:** Windows is not currently supported
+
+- CMake 3.15 or later
+- C99-compatible compiler (GCC, Clang, etc.)
+- [FLINT](https://flintlib.org/) library
+- pkg-config (optional, for easier linking)
+
+### Installing FLINT
+
+**Ubuntu/Debian:**
+```bash
+sudo apt-get install libflint-dev
+```
+
+**macOS (Homebrew):**
+```bash
+brew install flint
+```
+
+**From source or conda:**
+See [FLINT installation guide](https://flintlib.org/downloads.html), or [libflint on conda-forge](https://anaconda.org/channels/conda-forge/packages/libflint/overview)
+
+## Installation
+
+### From Source
+```bash
+# Clone the repository
+git clone https://github.com/matthewdemczyk/libcfftables.git
+cd libcfftables
+
+# Build and install
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+cmake --build .
+sudo cmake --install .
+```
+
+Or install to a local directory without sudo:
+```bash
+mkdir build && cd build
+cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$HOME/.local
+cmake --build .
+cmake --install .
+```
+
+### Using the Library
+
+#### With CMake:
+```cmake
+find_package(libcfftables REQUIRED)
+add_executable(myprogram myprogram.c)
+target_link_libraries(myprogram PRIVATE libcfftables::libcfftables)
+```
+
+#### With pkg-config:
+```bash
+gcc myprogram.c $(pkg-config --cflags --libs libcfftables) -o myprogram
+```
+
+
+### Uninstalling
+
+To uninstall, manually remove the installed files:
+```bash
+# If installed to /usr/local (with sudo)
+sudo rm -rf /usr/local/include/libcfftables
+sudo rm -f /usr/local/lib/libcfftables.*
+sudo rm -rf /usr/local/lib/cmake/libcfftables
+sudo rm -f /usr/local/lib/pkgconfig/libcfftables.pc
+
+# If installed to ~/.local (without sudo)
+rm -rf ~/.local/include/libcfftables
+rm -f ~/.local/lib/libcfftables.*
+rm -rf ~/.local/lib/cmake/libcfftables
+rm -f ~/.local/lib/pkgconfig/libcfftables.pc
+```
+
+Note: The exact files removed depend on your `CMAKE_INSTALL_PREFIX`.
 
 ## Licensing
 
