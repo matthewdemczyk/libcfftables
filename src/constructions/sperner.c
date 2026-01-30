@@ -5,6 +5,7 @@
 
 cff_t* cff_sperner(int n)
 {
+    if (n < 1) return NULL;
     // first, determine t = min{s : choose(s, s/2) >= n }
     int s = 0;
     while (((long long) choose(s, s / 2)) < n) // cast choose(s,s/2) to suppress compiler warnings

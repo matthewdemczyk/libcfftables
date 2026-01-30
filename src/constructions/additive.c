@@ -6,6 +6,7 @@
 
 cff_t* cff_additive(const cff_t *left, const cff_t *right)
 {
+    if (left == NULL || right == NULL) return NULL;
     cff_t *result = cff_alloc(
         left->d,
         left->t + right->t,

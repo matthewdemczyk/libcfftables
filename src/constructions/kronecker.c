@@ -5,6 +5,7 @@
 
 cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
 {
+    if (left == NULL || right == NULL) return NULL;
     // Verify if the cffs' parameters are valid
     if (left->d != right->d)
     {
