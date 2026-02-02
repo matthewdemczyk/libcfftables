@@ -135,13 +135,13 @@ To uninstall, manually remove the installed files:
 ```bash
 # If installed to /usr/local (with sudo)
 sudo rm -rf /usr/local/include/libcfftables
-sudo rm -f /usr/local/lib/libcfftables.*
+sudo rm -f /usr/local/lib/libcfftables.so*
 sudo rm -rf /usr/local/lib/cmake/libcfftables
 sudo rm -f /usr/local/lib/pkgconfig/libcfftables.pc
 
 # If installed to ~/.local (without sudo)
 rm -rf ~/.local/include/libcfftables
-rm -f ~/.local/lib/libcfftables.*
+rm -f ~/.local/lib/libcfftables.so*
 rm -rf ~/.local/lib/cmake/libcfftables
 rm -f ~/.local/lib/pkgconfig/libcfftables.pc
 ```
