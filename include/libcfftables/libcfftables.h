@@ -290,6 +290,9 @@ bool cff_verify(const cff_t *cff);
  *
  * The purpose of initializing this is to be able to use the functions
  * `cff_table_get_by_t()` and `cff_table_get_by_n()`, which will construct a CFF.
+ *
+ * @warning Access to a `cff_table_ctx_t` is not thread-safe. In multi-threaded applications,
+ * each thread must initialize and maintain its own `cff_table_ctx_t` instance.
  */
 typedef struct cff_table_ctx cff_table_ctx_t;
 /**
@@ -346,6 +349,10 @@ cff_t* cff_table_get_by_t(cff_table_ctx_t *ctx, int d, int t);
 
 /**
  * @brief Construct a CFF by supplying the desired `d` and `n`.
+ *
+ * @attention This function may return a CFF pointer with a larger `n` than the requested `n`. However,
+ * you can ignore the extra columns of the CFF, because it's possible to remove/ignore any `x` columns from
+ * a `d-CFF(t,n)` to get a valid `d-CFF(t,n-x)`.
  *
  * This function will construct a best-known CFF by consulting the CFF tables
  * to know which construction to use. Best-known means minimizing `t` for the
