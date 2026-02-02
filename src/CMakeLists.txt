@@ -1,4 +1,4 @@
-#src cmake
+# src/CMakeLists.txt
 # ==============================================================================
 # Core Library (libcfftables)
 # ==============================================================================
@@ -42,8 +42,7 @@ target_include_directories(libcfftables
 
 # Link libraries
 target_link_libraries(libcfftables
-    PUBLIC PkgConfig::FLINT
-    PRIVATE m
+    PRIVATE FLINT::FLINT m
 )
 
 # Compiler flags
@@ -67,11 +66,6 @@ set_target_properties(libcfftables PROPERTIES
     VERSION ${PROJECT_VERSION}
     SOVERSION ${PROJECT_VERSION_MAJOR}
     OUTPUT_NAME cfftables  # This creates libcfftables.so on Unix
-)
-
-# Set rpath for installed library
-set_target_properties(libcfftables PROPERTIES
-    INSTALL_RPATH_USE_LINK_PATH TRUE
 )
 
 # Install the library
