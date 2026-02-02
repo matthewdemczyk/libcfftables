@@ -4,8 +4,10 @@ libdir=@CMAKE_INSTALL_FULL_LIBDIR@
 includedir=@CMAKE_INSTALL_FULL_INCLUDEDIR@
 
 Name: libcfftables
-Description: CFF Tables Library
+Description: Cover-Free Family (CFF) construction and manipulation library
+URL: https://github.com/matthewdemczyk/libcfftables
 Version: @PROJECT_VERSION@
 Requires.private: flint
 Libs: -L${libdir} -lcfftables
+Libs.private: -lm
 Cflags: -I${includedir}
