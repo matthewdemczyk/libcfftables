@@ -1,4 +1,4 @@
-#root cmake
+# ./CMakeLists.txt
 cmake_minimum_required(VERSION 3.15)
 project(libcfftables VERSION 0.1.4 LANGUAGES C)
 
@@ -12,32 +12,20 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # Set C standard
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_C_EXTENSIONS OFF)
 
 # -----------------------------
 # Find FLINT via pkg-config in Conda
 # -----------------------------
-find_package(PkgConfig REQUIRED)
 
-# If in a Conda environment, prioritize Conda's pkg-config path
-if(DEFINED ENV{CONDA_PREFIX})
-    set(ENV{PKG_CONFIG_PATH} "$ENV{CONDA_PREFIX}/lib/pkgconfig:$ENV{PKG_CONFIG_PATH}")
-    message(STATUS "Conda environment detected: $ENV{CONDA_PREFIX}")
-    message(STATUS "PKG_CONFIG_PATH: $ENV{PKG_CONFIG_PATH}")
-endif()
+find_package(FLINT CONFIG QUIET)
 
-pkg_check_modules(FLINT REQUIRED IMPORTED_TARGET flint)
-
-# Verify which FLINT was found
-if(FLINT_FOUND)
-    message(STATUS "FLINT found:")
-    message(STATUS "  Version: ${FLINT_VERSION}")
-    message(STATUS "  Include dirs: ${FLINT_INCLUDE_DIRS}")
-    message(STATUS "  Library dirs: ${FLINT_LIBRARY_DIRS}")
-    message(STATUS "  Libraries: ${FLINT_LIBRARIES}")
-endif()
-
-# Create alias for backward compatibility
 if(NOT TARGET FLINT::FLINT)
+    # Fallback: pkg-config
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(FLINT REQUIRED IMPORTED_TARGET flint)
+
+    # Create FLINT::FLINT alias for consistent usage
     add_library(FLINT::FLINT ALIAS PkgConfig::FLINT)
 endif()
 
@@ -95,6 +83,15 @@ configure_file(
 # Install pkg-config file
 install(FILES ${CMAKE_CURRENT_BINARY_DIR}/libcfftables.pc
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/pkgconfig
+)
+
+# -----------------------------
+# Install license
+# -----------------------------
+
+install(FILES
+    ${CMAKE_CURRENT_SOURCE_DIR}/LICENSE
+    DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/licenses/${PROJECT_NAME}
 )
 
 # -----------------------------
