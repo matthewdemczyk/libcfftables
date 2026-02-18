@@ -1,5 +1,5 @@
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://matthewdemczyk.github.io/libcfftables/)
-![Build and Test](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml/badge.svg)
+![CI](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml/badge.svg)
 
 
 ## About
@@ -127,7 +127,7 @@ target_link_libraries(myprogram PRIVATE libcfftables::libcfftables)
 ```bash
 gcc myprogram.c $(pkg-config --cflags --libs libcfftables) -o myprogram
 ```
-
+Note: you may need to update your PKG_CONFIG_PATH environment variable to include the path you installed to.
 
 ### Uninstalling
 
