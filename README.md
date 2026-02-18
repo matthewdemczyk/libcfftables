@@ -1,5 +1,5 @@
 [![Documentation](https://img.shields.io/badge/docs-doxygen-blue.svg)](https://matthewdemczyk.github.io/libcfftables/)
-![CI](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml/badge.svg)
+[![CI](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml/badge.svg)](https://github.com/matthewdemczyk/libcfftables/actions/workflows/test.yaml)
 
 
 ## About
@@ -131,22 +131,10 @@ Note: you may need to update your PKG_CONFIG_PATH environment variable to includ
 
 ### Uninstalling
 
-To uninstall, manually remove the installed files:
+To uninstall, cd into the build directory and run
 ```bash
-# If installed to /usr/local (with sudo)
-sudo rm -rf /usr/local/include/libcfftables
-sudo rm -f /usr/local/lib/libcfftables.so*
-sudo rm -rf /usr/local/lib/cmake/libcfftables
-sudo rm -f /usr/local/lib/pkgconfig/libcfftables.pc
-
-# If installed to ~/.local (without sudo)
-rm -rf ~/.local/include/libcfftables
-rm -f ~/.local/lib/libcfftables.so*
-rm -rf ~/.local/lib/cmake/libcfftables
-rm -f ~/.local/lib/pkgconfig/libcfftables.pc
+sudo xargs rm < install_manifest.txt
 ```
-
-Note: The exact files removed depend on your `CMAKE_INSTALL_PREFIX`.
 
 ## Licensing
 
