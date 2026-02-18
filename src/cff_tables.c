@@ -468,7 +468,7 @@ void cff_table_write_csv(cff_table_ctx_t *ctx, const char *folder_path)
             cff_table_long_name(ctx, i, t, longSrc);
             fprintf(
                 fptr,
-                "\n%d, %llu, %s, %s",
+                "\n%d, %lld, %s, %s",
                 t,
                 ctx->tables_array[i]->array[t].n,
                 shortSrc,
