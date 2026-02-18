@@ -139,7 +139,7 @@ cff_t* cff_alloc(int d, int t, long long n);
  */
 void cff_free(cff_t *cff);
 /**
- * @brief Initialze a `cff_t` from an int matrix of 0s and 1s.
+ * @brief Initialize a `cff_t` from an int matrix of 0s and 1s.
  *
  * @param d The `d` of the CFF.
  * @param t The number of rows of the CFF's incidence matrix.
@@ -183,7 +183,22 @@ int cff_get_t(const cff_t *cff);
  * @param cff The CFF to get `n` from.
  * @return The `n` of the `cff_t`, or `-1` if `cff` is `NULL`.
  */
-int cff_get_n(const cff_t *cff);
+long long cff_get_n(const cff_t *cff);
+/**
+ * @brief Helper function that can be used to reduce the n of a CFF
+ *
+ * This function modifies the stored value for n of a CFF. This does not change the
+ * memory for the CFF's bitfield (incidence matrix), so the extra columns are still stored
+ * in memory, they just can't be accessed after a CFF has its n reduced.
+ *
+ * This function can be useful if using cff_table_get_by_n, since the function will sometimes return
+ * a CFF with larger n than requested. By reducing the n after getting the CFF, this can
+ * make working with the CFF more simple.
+ *
+ * @param cff A pointer to the CFF to modify `n` for
+ * @param n The new `n` value
+ */
+void cff_reduce_n(cff_t *cff, long long n);
 /**
  * @brief Sets a `cff_t`'s `d`.
  *
@@ -231,7 +246,7 @@ int cff_get_matrix_value(const cff_t *cff, int r, int c);
  */
 void cff_set_matrix_value(cff_t *cff, int r, int  c, int val);
 /**
- * @brief Prints a `cff_t` to stdin.
+ * @brief Prints a `cff_t` to stdout.
  *
  * The will first print `d-CFF(t,n)` where `d`,`t`,`n` are read from the `cff_t`.
  * The zeros of the CFF are printed as a `-` instead of `0`.
@@ -435,7 +450,7 @@ cff_t* cff_sts(int v);
  * @pre d = 2.
  * @pre 10 >= t >= 23.
  *
- * @return A pointer to a newly copied fixed CFF, or NULL on failure. The user gains ownersip of
+ * @return A pointer to a newly copied fixed CFF, or NULL on failure. The user gains ownership of
  * this and must free it after use with `cff_free()`.
  */
 cff_t* cff_fixed(int d, int t);
@@ -458,7 +473,7 @@ cff_t* cff_fixed(int d, int t);
  * @warning The caller must ensure the preconditions are true before calling this function, or there may
  * be undefined behaviour.
  *
- * @return Pointer to a `((m - 1) / (t + 1))-CFF(m*(p^exp), (p^exp)^t)`, or NULL on failure.
+ * @return Pointer to a `((m - 1) / (t - 1))-CFF(m*(p^exp), (p^exp)^t)`, or NULL on failure.
  */
 cff_t* cff_reed_solomon(int p, int exp, int t, int m);
 /**
@@ -482,7 +497,7 @@ cff_t* cff_reed_solomon(int p, int exp, int t, int m);
  * @warning The caller must ensure the preconditions are true before calling this function, or there may
  * be undefined behaviour.
  *
- * @return Pointer to a `(((m-s) - 1) / ((t-s) + 1))-CFF((m-s)*(p^exp), (p^exp)^(t-s))`, or NULL on failure.
+ * @return Pointer to a `(((m-s) - 1) / ((t-s) - 1))-CFF((m-s)*(p^exp), (p^exp)^(t-s))`, or NULL on failure.
  */
 cff_t* cff_short_reed_solomon(int p, int exp, int t, int m, int s);
 /**
@@ -580,6 +595,43 @@ cff_t* cff_optimized_kronecker
     const cff_t *bottom_cff        //     d-CFF(t2, n2)
 );
 /** @} */ // end of construction group
+
+/**
+ * @defgroup internal Advanced / low-level accessors
+ * @warning These expose the internal representation.
+ *          They are intended for high-performance bindings.
+ * @{
+ */
+
+ /**
+  * @brief Returns a pointer to the bitfield for the CFF's matrix
+  *
+  * @warning This function is intended for high performance bindings. A user should typically use
+  * `cff_get_matrix_value()` instead.
+  *
+  * The matrix is stored in row-major order with t rows. Each row occupies cff_get_row_pitch_bits() bits.
+  * However only the first `n` bits of the row are used. The extra bits (less than or equal to 7 bits) are
+  * used to ensure byte alignment.
+  *
+  * @note The returned pointer is owned by the CFF and remains valid until cff_free() is called.
+  *
+  * @param cff The CFF whose bitfield to access.
+  * @return A pointer to the CFF's bitfield, or NULL on failure.
+  */
+const unsigned char* cff_matrix_data(const cff_t *cff);
+
+/**
+ * @brief Get the row pitch, in bits, of the CFF’s incidence matrix.
+ *
+ * Returns the number of bits between the start of consecutive rows in the incidence matrix.
+ * This value is a multiple of 8 to ensure byte alignment.
+ *
+ * @param cff The CFF to access.
+ * @return The the row pitch, in bits, of the CFF’s incidence matrix.
+ */
+long long cff_get_row_pitch_bits(const cff_t *cff);
+
+/** @} */
 
 #ifdef __cplusplus
 }

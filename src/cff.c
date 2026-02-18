@@ -19,7 +19,7 @@ cff_t* cff_alloc(int d, int t, long long n)
     c->d = d;
     c->t = t;
     c->n = n;
-    c->stride_bits = ((n + 7) / 8) * 8;
+    c->stride_bits = (long long) (((n + 7) / 8) * 8);
     c->matrix = calloc(((n + 7) / 8) * t, sizeof(unsigned char));
     if (c->matrix == NULL) return NULL;
     return c;
@@ -40,7 +40,7 @@ int cff_get_d(const cff_t *cff)
 
 void cff_set_d(cff_t *cff, int d)
 {
-     if (!cff) return;
+    if (!cff) return;
     cff->d = d;
 }
 
@@ -50,16 +50,35 @@ int cff_get_t(const cff_t *cff)
     return cff->t;
 }
 
-int cff_get_n(const cff_t *cff)
+long long cff_get_n(const cff_t *cff)
 {
      if (!cff) return -1;
     return cff->n;
 }
 
+void cff_reduce_n(cff_t *cff, long long n)
+{
+    if (!cff) return;
+    if (n < cff->n)
+    {
+        cff->n = n;
+    }
+}
+
+const unsigned char* cff_matrix_data(const cff_t *cff)
+{
+    return cff ? cff->matrix : NULL;
+}
+
+long long cff_get_row_pitch_bits(const cff_t *cff)
+{
+    return cff ? cff->stride_bits : 0;
+}
+
 // setter for the row "r" and column "c" for a value in the 0-1 CFF Matrix.
 void cff_set_matrix_value(cff_t *cff, int r, int  c, int val)
 {
-    int bitIndex = r * cff->stride_bits + c;
+    long long bitIndex = (long long) (r * cff->stride_bits + c);
     if (val)
     {
         cff->matrix[bitIndex / 8] |= (1 << (bitIndex % 8));
@@ -72,7 +91,7 @@ void cff_set_matrix_value(cff_t *cff, int r, int  c, int val)
 // getter for the row "r" and column "c" for a value in the 0-1 CFF Matrix.
 int cff_get_matrix_value(const cff_t *cff, int r, int c)
 {
-    int bitIndex = r * cff->stride_bits + c;
+    long long bitIndex = (long long) (r * cff->stride_bits + c);
     return (cff->matrix[bitIndex / 8] >> (bitIndex % 8)) & 1;
 }
 
@@ -162,7 +181,7 @@ void cff_write(const cff_t *cff, FILE *file)
                 fprintf(file, "0");
             }
         }
-        printf("\n");
+        fprintf(file, "\n");
     }
 }
 

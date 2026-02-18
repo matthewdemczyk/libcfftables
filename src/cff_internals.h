@@ -11,7 +11,7 @@ struct cff
     int d;
     int t;
     long long n;
-    int stride_bits; // helper for faster memory access
+    long long stride_bits; // helper for faster memory access
     unsigned char *matrix;
 };
 
