@@ -82,32 +82,37 @@ cff_t* cff_table_get_by_t_rec(cff_table_ctx_t *ctx, int d, int t, intermediate_c
         case CFF_CONSTRUCTION_ID_FIXED_CFF:
             cff = cff_fixed(d, t);
             break;
-        case CFF_CONSTRUCTION_ID_EXT_BY_ONE:
+        case CFF_CONSTRUCTION_ID_EXT_BY_ONE: {
             // this can be improved a lot by checking how many ext by ones it will do in advance, then
             // just doing an additive with a certain size identity matrix
             cff_t *to_extend = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
             cff = cff_extend_by_one(to_extend);
             break;
-        case CFF_CONSTRUCTION_ID_ADDITIVE:
+        }
+        case CFF_CONSTRUCTION_ID_ADDITIVE: {
             cff_t *right_k = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
             cff_t *left_k = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
             cff = cff_additive(left_k, right_k);
             break;
-        case CFF_CONSTRUCTION_ID_DOUBLING:
+        }
+        case CFF_CONSTRUCTION_ID_DOUBLING: {
             cff_t *smallerCFF = cff_table_get_by_t_rec(ctx, 2, ctx->tables_array[1]->array[t].consParams[0], lst);
             cff = cff_doubling(smallerCFF, (int) ctx->tables_array[1]->array[t].consParams[1]);
             break;
-        case CFF_CONSTRUCTION_ID_KRONECKER:
+        }
+        case CFF_CONSTRUCTION_ID_KRONECKER: {
             cff_t *left = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
             cff_t *right = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
             cff = cff_kronecker(left, right);
             break;
-        case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER:
+        }
+        case CFF_CONSTRUCTION_ID_OPTIMIZED_KRONECKER: {
             cff_t* inner = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[0], lst);
             cff_t* bottom = cff_table_get_by_t_rec(ctx, d, ctx->tables_array[d-1]->array[t].consParams[1], lst);
             cff_t* outer = cff_table_get_by_t_rec(ctx, d-1, ctx->tables_array[d-1]->array[t].consParams[2], lst);
             cff = cff_optimized_kronecker(outer, inner, bottom);
             break;
+        }
         default:
             break;
         }
