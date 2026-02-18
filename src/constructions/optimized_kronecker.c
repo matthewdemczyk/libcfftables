@@ -28,6 +28,8 @@ cff_t* cff_optimized_kronecker
         bottom_cff->n * kronecker_inner->n // n
     );
 
+    if (product_cff == NULL) return NULL;
+
     // Construct the kronecker product of the first 2 CFFs
     for (int n1 = 0; n1 < bottom_cff->n; n1++)
     {

@@ -12,6 +12,7 @@ cff_t* cff_additive(const cff_t *left, const cff_t *right)
         left->t + right->t,
         left->n + right->n
     );
+    if (result == NULL) return NULL;
     for (int r = 0; r < left->t; r++)
     {
         for (int c = 0; c < left->n; c++)

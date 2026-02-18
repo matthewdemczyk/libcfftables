@@ -10,6 +10,7 @@ cff_t* cff_extend_by_one(const cff_t* cff)
     if (cff == NULL) return NULL;
     int matrix[1][1] = {{1}};
     cff_t *one_by_one_cff = cff_from_matrix(cff->d, 1, 1, (int *) matrix);
+    if (one_by_one_cff == NULL) return NULL;
     cff_t *result_cff = cff_additive(cff, one_by_one_cff);
     cff_free(one_by_one_cff);
     return result_cff;

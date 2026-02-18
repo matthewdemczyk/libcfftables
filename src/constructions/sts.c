@@ -181,6 +181,7 @@ cff_t* cff_sts(int v)
         return NULL;
     }
     cff_t *cff = cff_alloc(2, sts->order, sts->numBlocks);
+    if (cff == NULL) return NULL;
     for (int i = 0; i < sts->numBlocks; i++)
     {
         for (int n = 0; n < 3; n++)

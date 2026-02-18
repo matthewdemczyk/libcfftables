@@ -30,6 +30,7 @@ cff_t* gen_matrix_to_cff(generator_matrix_t gs)
         gs.m*gs.q, // t
         (int)pow(gs.q, gs.k) //n
     );
+    if (cff == NULL) return NULL;
     int (*code)[cff->n] = (int (*)[cff->n]) gs.code;
     for (int codewordIndex = 0; codewordIndex < cff->n; codewordIndex++)
     {

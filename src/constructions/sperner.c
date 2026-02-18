@@ -17,6 +17,8 @@ cff_t* cff_sperner(int n)
     // allocate memory for the CFF and set its matrix to all 0s
     cff_t *cff = cff_alloc(1, t, n);
 
+    if (cff == NULL) return NULL;
+
     // create the buffer for the current t/2-subset of {1 ... t}
     // and populate it with the first (lexicographic) set
     int subset[t / 2];

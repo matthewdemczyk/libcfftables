@@ -19,6 +19,8 @@ cff_t* cff_kronecker(const cff_t *left, const cff_t *right)
         left->n * right->n // "n" of the product cff
     );
 
+    if (product_cff == NULL) return NULL;
+
     // loop over right
     for (int n1 = 0; n1 < right->n; n1++)
     {

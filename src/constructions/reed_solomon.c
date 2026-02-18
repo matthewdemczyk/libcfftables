@@ -56,19 +56,24 @@ void cff_table_add_reed_solomon_cffs(cff_table_ctx_t *ctx, int cff_d, int t_max,
 cff_t* cff_reed_solomon(int p, int exp, int t, int m)
 {
     // populate finite field add and mult tables
-    int q = pow(p, exp);
+    int q = ipow(p, exp);
     //int multiplication_field[q][q];
     //int addition_field[q][q];
     int *addition_field = malloc(q * q * sizeof(int));
+    if (addition_field == NULL) return NULL;
     int *multiplication_field = malloc(q * q * sizeof(int));
+    if (multiplication_field == NULL) return NULL;
     populate_finite_field(p, exp, addition_field, multiplication_field);
 
     // allocate cff memory and fill with zeros
     cff_t *cff = cff_alloc(
         (m - 1) / (m - (m - t + 1)), // = d
         q * m,                       // = t
-        ((int) pow(q, t))            // = n
+        ipow(q, t)                   // = n
     );
+
+    if (cff == NULL) return NULL;
+    printf("d=%d, t=%d, n=%lld, q=%d\n", cff->d, cff->t, cff->n, q);
 
     // loop over all polynomials/codewords
     int polynomial_coefficients[t];

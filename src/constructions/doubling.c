@@ -39,6 +39,8 @@ cff_t* cff_doubling(const cff_t *cff, int s)
         resultCFF = cff_alloc(2, cff->t + s + 2, cff->n * 2);
     }
 
+    if (resultCFF == NULL) return NULL;
+
     // set the top rows, which are two copies of the cff
     for (int r = 0; r < cff->t; r++)
     {
