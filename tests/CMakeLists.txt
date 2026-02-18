@@ -16,7 +16,7 @@ foreach(test_src ${TEST_SOURCES})
     add_executable(${test_name} ${test_src})
 
     # Link against libcfftables
-    target_link_libraries(${test_name} PRIVATE libcfftables::libcfftables)
+    target_link_libraries(${test_name} PRIVATE libcfftables::libcfftables FLINT::FLINT)
 
     # Register test with CTest
     add_test(NAME ${test_name} COMMAND ${test_name})
