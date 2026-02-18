@@ -73,7 +73,7 @@ cff_t* cff_reed_solomon(int p, int exp, int t, int m)
     );
 
     if (cff == NULL) return NULL;
-    printf("d=%d, t=%d, n=%lld, q=%d\n", cff->d, cff->t, cff->n, q);
+    //printf("d=%d, t=%d, n=%lld, q=%d\n", cff->d, cff->t, cff->n, q);
 
     // loop over all polynomials/codewords
     int polynomial_coefficients[t];

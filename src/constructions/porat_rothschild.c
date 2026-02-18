@@ -129,7 +129,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     populate_multiplicative_inverses(p, a,(int *) mult, mult_inverses);
     if (q < 2 * r || q >= 4 * r)
     {
-        printf("Parameters do not match thm requirments. q not in [2r, 4r)\n");
+        printf("WARNING: Parameters do not match thm requirments. q not in [2r, 4r)\n");
     }
     // determine other parameters from q,k,d (cff's d)
     double delta = (((double) r) - 1.0) / ((double) r);
@@ -143,8 +143,8 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     // store q^k, since it's in a for loop bound
     int q_to_the_k = (int) pow(q, k);
 
-    printf("Starting porat cons with: q=%d k=%d r=%d m=%d Hq(δ)=%f δ=%f Distance=%d\n",q,k,r,m,Hq,delta,D);
-    printf("This gives a: %d-CFF(%d,%d)\n", r-1, m*q, q_to_the_k);
+    //printf("Starting porat cons with: q=%d k=%d r=%d m=%d Hq(δ)=%f δ=%f Distance=%d\n",q,k,r,m,Hq,delta,D);
+    //printf("This gives a: %d-CFF(%d,%d)\n", r-1, m*q, q_to_the_k);
 
     // allocate memory for the generator matrix
     int* g_pointer = malloc(sizeof(int) * k * m);
@@ -198,7 +198,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     {
         for (int j = 1; j <= k; j++)
         {
-            printf("filling G[i=%d][j=%d]\n",i,j);
+            //printf("filling G[i=%d][j=%d]\n",i,j);
             for (int b = 0; b < q; b++)
             {
                 W[b] = 0;
@@ -221,14 +221,14 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
             int v_best = 0;
             for (int b = 0; b < q; b++)
             {
-                printf("\tW[%d] = %.17g\n", b, W[b]);
+                //printf("\tW[%d] = %.17g\n", b, W[b]);
                 if (W[b] > E_best)
                 {
                     v_best = b;
                     E_best = W[b];
                 }
             }
-            printf("\tLetter %d was chosen as best\n", v_best);
+            //printf("\tLetter %d was chosen as best\n", v_best);
             G[i-1][j-1] = v_best;
             for (int l = (int) pow(q, j-1); l < (int) pow(q, j); l++)
             {
