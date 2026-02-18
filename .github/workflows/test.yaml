@@ -1,4 +1,4 @@
-name: Build and Test
+name: CI
 
 on:
   push:
@@ -27,7 +27,7 @@ jobs:
     - name: Install dependencies
       shell: bash -el {0}
       run: |
-        conda install -c conda-forge libflint gcovr cmake make
+        conda install -c conda-forge libflint cmake make
 
     - name: Configure CMake
       shell: bash -el {0}
