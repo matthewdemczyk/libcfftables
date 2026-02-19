@@ -23,21 +23,21 @@ typedef struct generator_matrix {
     int minDistance;
 } generator_matrix_t;
 
-cff_t* gen_matrix_to_cff(generator_matrix_t gs)
+cff_t* gen_matrix_to_cff(generator_matrix_t *gs)
 {
     cff_t* cff = cff_alloc(
-        (gs.m - 1 ) / (gs.m - (gs.minDistance)),// d
-        gs.m*gs.q, // t
-        ipow(gs.q, gs.k) //n
+        (gs->m - 1 ) / (gs->m - (gs->minDistance)),// d
+        gs->m*gs->q, // t
+        ipow(gs->q, gs->k) //n
     );
     if (cff == NULL) return NULL;
-    int (*code)[cff->n] = (int (*)[cff->n]) gs.code;
+    int (*code)[cff->n] = (int (*)[cff->n]) gs->code;
     for (int codewordIndex = 0; codewordIndex < cff->n; codewordIndex++)
     {
-        for (int codewordPosition = 0; codewordPosition < gs.m; codewordPosition++)
+        for (int codewordPosition = 0; codewordPosition < gs->m; codewordPosition++)
         {
             int codewordLetter = code[codewordPosition][codewordIndex];
-            cff_set_matrix_value(cff, (codewordPosition * gs.q) + codewordLetter, codewordIndex, 1);
+            cff_set_matrix_value(cff, (codewordPosition * gs->q) + codewordLetter, codewordIndex, 1);
         }
     }
     return cff;
@@ -109,14 +109,15 @@ bool k_tuple_reverse_lex_successor(int n, int k, int buffer[k])
     return false;
 }
 
-void freegenerator_matrix_t(generator_matrix_t genMatrixStruct)
+void freegenerator_matrix_t(generator_matrix_t* genMatrixStruct)
 {
-    free(genMatrixStruct.generatorMatrix);
-    free(genMatrixStruct.code);
+    free(genMatrixStruct->generatorMatrix);
+    free(genMatrixStruct->code);
+    free(genMatrixStruct);
 }
 
 // Porat construction
-generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r, int m)
+generator_matrix_t* porat_rothschild_code_construction(int p, int a, int k, int r, int m)
 {
     int q = compute_field_size(p,a);
     int add[q][q];
@@ -136,6 +137,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     double Hq = porat_entropy_function((double) q, (double) r);
     if (m == 0)
     {
+        if (Hq == 1.0) return NULL;
         m = (int) ceil(((double) (k)) / (1.0 - Hq));
     }
     int D = (int) floor(delta*m);
@@ -143,8 +145,8 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     // store q^k, since it's in a for loop bound
     int q_to_the_k = ipow(q, k);
 
-    //printf("Starting porat cons with: q=%d k=%d r=%d m=%d Hq(δ)=%f δ=%f Distance=%d\n",q,k,r,m,Hq,delta,D);
-    //printf("This gives a: %d-CFF(%d,%d)\n", r-1, m*q, q_to_the_k);
+    printf("Starting porat cons with: q=%d k=%d r=%d m=%d Hq(δ)=%f δ=%f Distance=%d\n",q,k,r,m,Hq,delta,D);
+    printf("This gives a: %d-CFF(%d,%d)\n", r-1, m*q, q_to_the_k);
 
     // allocate memory for the generator matrix
     int* g_pointer = malloc(sizeof(int) * k * m);
@@ -249,27 +251,28 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
         }
     }
 
-    generator_matrix_t genMatrixStruct;
-    genMatrixStruct.q = q;
-    genMatrixStruct.k = k;
-    genMatrixStruct.r = r;
-    genMatrixStruct.m = m;
+    generator_matrix_t *genMatrixStruct = malloc(sizeof(generator_matrix_t));
+    genMatrixStruct->q = q;
+    genMatrixStruct->k = k;
+    genMatrixStruct->r = r;
+    genMatrixStruct->m = m;
 
-    genMatrixStruct.Hq = Hq;
-    genMatrixStruct.delta = delta;
+    genMatrixStruct->Hq = Hq;
+    genMatrixStruct->delta = delta;
 
-    genMatrixStruct.generatorMatrix = g_pointer;
-    genMatrixStruct.code = code_pointer;
+    genMatrixStruct->generatorMatrix = g_pointer;
+    genMatrixStruct->code = code_pointer;
 
-    genMatrixStruct.numCodewords = q_to_the_k;
-    genMatrixStruct.minDistance = D;
+    genMatrixStruct->numCodewords = q_to_the_k;
+    genMatrixStruct->minDistance = D;
 
     return genMatrixStruct;
 }
 
 cff_t* cff_porat_rothschild(int p, int a, int k, int r, int m)
 {
-    generator_matrix_t gs = porat_rothschild_code_construction(p,a,k,r,m);
+    generator_matrix_t *gs = porat_rothschild_code_construction(p,a,k,r,m);
+    if (gs == NULL) return NULL;
     cff_t *cff = gen_matrix_to_cff(gs);
     freegenerator_matrix_t(gs);
     return cff;
