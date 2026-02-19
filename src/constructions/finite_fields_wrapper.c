@@ -80,16 +80,14 @@ static inline int* get_element(int *array, int row, int col, int field_size) {
     return &array[row * field_size + col];
 }
 
-void populate_finite_field(int p, int k, int *addition_field, int *multiplication_field) {
+int populate_finite_field(int p, int k, int *addition_field, int *multiplication_field) {
     if (k > MAX_K || k <= 0 || p <= 1) {
-        //return -1;
-        exit(1); // invalid parameters
+        return -1; // invalid parameters
     }
 
     int field_size = compute_field_size(p, k);
     if (field_size <= 0) {
-        //return -1;
-        exit(1); // field size computation failed
+        return -1; // field size computation failed
     }
 
     // initialize context
@@ -103,8 +101,7 @@ void populate_finite_field(int p, int k, int *addition_field, int *multiplicatio
     if (!elements) {
         fmpz_clear(p_fmpz);
         fq_ctx_clear(ctx);
-        //return -1;
-        exit(1);
+        return -1;
     }
 
     int *temp_coeffs = malloc(k * sizeof(int));
@@ -112,8 +109,7 @@ void populate_finite_field(int p, int k, int *addition_field, int *multiplicatio
         free(elements);
         fmpz_clear(p_fmpz);
         fq_ctx_clear(ctx);
-        //return -1;
-        exit(1);
+        return -1;
     }
 
     // initialize all elements
@@ -185,7 +181,7 @@ void populate_finite_field(int p, int k, int *addition_field, int *multiplicatio
     free(elements);
     free(temp_coeffs);
     fq_ctx_clear(ctx);
-    //return 0;
+    return 0;
 }
 // horner's method
 // https://en.wikipedia.org/wiki/Horner%27s_method#Polynomial_evaluation_and_long_division

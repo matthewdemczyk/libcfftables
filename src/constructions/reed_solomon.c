@@ -63,7 +63,8 @@ cff_t* cff_reed_solomon(int p, int exp, int t, int m)
     if (addition_field == NULL) return NULL;
     int *multiplication_field = malloc(q * q * sizeof(int));
     if (multiplication_field == NULL) return NULL;
-    populate_finite_field(p, exp, addition_field, multiplication_field);
+    int ff_status = populate_finite_field(p, exp, addition_field, multiplication_field);
+    if (ff_status != 0) return NULL;
 
     // allocate cff memory and fill with zeros
     cff_t *cff = cff_alloc(

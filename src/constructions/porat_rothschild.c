@@ -125,7 +125,8 @@ generator_matrix_t* porat_rothschild_code_construction(int p, int a, int k, int 
     int mult_inverses[q];
     int add_inverses[q];
 
-    populate_finite_field(p,a,(int *)add,(int *)mult);
+    int ff_status = populate_finite_field(p,a,(int *)add,(int *)mult);
+    if (ff_status != 0) return NULL;
     populate_additive_inverses(p, a,(int *) add, add_inverses); //remove this linear search
     populate_multiplicative_inverses(p, a,(int *) mult, mult_inverses);
     if (q < 2 * r || q >= 4 * r)

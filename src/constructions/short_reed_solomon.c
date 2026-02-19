@@ -22,7 +22,8 @@ cff_t* cff_short_reed_solomon(int p, int exp, int k, int m, int s)
     if (addition_field == NULL) return NULL;
     int *multiplication_field = malloc(q * q * sizeof(int));
     if (multiplication_field == NULL) return NULL;
-    populate_finite_field(p, exp, (int*) addition_field, (int*) multiplication_field);
+    int ff_status = populate_finite_field(p, exp, (int*) addition_field, (int*) multiplication_field);
+    if (ff_status != 0) return NULL;
 
     int short_m = m - s;
     int short_k = k - s;

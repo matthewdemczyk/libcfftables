@@ -3,7 +3,7 @@
 
 // to remove the FLINT library dependancy from this codebase, reimplement these functions
 
-void populate_finite_field(int p, int k, int *addition_field, int *multiplication_field);
+int populate_finite_field(int p, int k, int *addition_field, int *multiplication_field);
 int compute_field_size(int p, int k);
 int horner_polynomial_eval_over_fq(
     int polyLength,
