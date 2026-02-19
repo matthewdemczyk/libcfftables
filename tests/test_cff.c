@@ -199,7 +199,10 @@ void test_cff_write() {
     // Read back and verify
     f = fopen("cff_test_output.txt", "r");
     char buffer[10];
-    fgets(buffer, 10, f);
+    if (fgets(buffer, 10, f) == NULL) {
+        fclose(f);
+        assert(0);
+    }
     assert(buffer[0] == '1' && buffer[1] == '0' && buffer[2] == '0');
     fclose(f);
     remove("cff_test_output.txt");
