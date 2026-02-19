@@ -37,5 +37,5 @@ int main()
     test_kronecker_1();
     test_kronecker_2();
 
-    puts("ALL test_additive passed");
+    puts("ALL test_kronecker passed");
 }
