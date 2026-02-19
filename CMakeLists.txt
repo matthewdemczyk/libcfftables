@@ -1,6 +1,6 @@
 # ./CMakeLists.txt
 cmake_minimum_required(VERSION 3.15)
-project(libcfftables VERSION 0.1.4 LANGUAGES C)
+project(libcfftables VERSION 1.0.0 LANGUAGES C)
 
 include(GNUInstallDirs)
 include(CTest)
