@@ -11,6 +11,9 @@ cff_t* cff_optimized_kronecker
     const cff_t* bottom_cff        //     d-CFF(t2, n2)
 )
 {
+    if (kronecker_outer == NULL) return NULL;
+    if (kronecker_inner == NULL) return NULL;
+    if (bottom_cff == NULL) return NULL;
     // Verify that the parameters are valid
     if (kronecker_inner->d != bottom_cff->d)
     {
