@@ -28,7 +28,7 @@ cff_t* gen_matrix_to_cff(generator_matrix_t gs)
     cff_t* cff = cff_alloc(
         (gs.m - 1 ) / (gs.m - (gs.minDistance)),// d
         gs.m*gs.q, // t
-        (int)pow(gs.q, gs.k) //n
+        ipow(gs.q, gs.k) //n
     );
     if (cff == NULL) return NULL;
     int (*code)[cff->n] = (int (*)[cff->n]) gs.code;
@@ -141,7 +141,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
     int D = (int) floor(delta*m);
 
     // store q^k, since it's in a for loop bound
-    int q_to_the_k = (int) pow(q, k);
+    int q_to_the_k = ipow(q, k);
 
     //printf("Starting porat cons with: q=%d k=%d r=%d m=%d Hq(δ)=%f δ=%f Distance=%d\n",q,k,r,m,Hq,delta,D);
     //printf("This gives a: %d-CFF(%d,%d)\n", r-1, m*q, q_to_the_k);
@@ -203,11 +203,11 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
             {
                 W[b] = 0;
             }
-            for (int l = (int) pow(q, j-1); l < (int) pow(q, j); l++)
+            for (int l = ipow(q, j-1); l < ipow(q, j); l++)
             {
                 c = i - A[l];
                 v = mult
-                    [code[i-1][(l%((int)pow(q,j-1)))]]
+                    [code[i-1][(l%(ipow(q,j-1)))]]
                     [add_inverses[mult_inverses[y[l][j-1]]]];
                 if ( (D-c)>-1)
                 {
@@ -230,7 +230,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
             }
             //printf("\tLetter %d was chosen as best\n", v_best);
             G[i-1][j-1] = v_best;
-            for (int l = (int) pow(q, j-1); l < (int) pow(q, j); l++)
+            for (int l = ipow(q, j-1); l < ipow(q, j); l++)
             {
                 v = add
                         [mult
@@ -238,7 +238,7 @@ generator_matrix_t porat_rothschild_code_construction(int p, int a, int k, int r
                             [y[l][j-1]]
                         ]
                         [
-                            code[i-1][(l%((int)pow(q,j-1)))]
+                            code[i-1][(l%(ipow(q,j-1)))]
                         ];
                 if (v == 0)
                 {
