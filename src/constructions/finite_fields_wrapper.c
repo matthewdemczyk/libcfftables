@@ -1,11 +1,11 @@
 #include <math.h>
 #include <stdlib.h>
 #include <limits.h>
-#include "flint/flint.h"
-#include "flint/fq.h"
-#include "flint/fmpz.h"
-#include "flint/fmpz_poly.h"
-#include "flint/fmpz_mod_poly.h"
+#include <flint/flint.h>
+#include <flint/fq.h>
+#include <flint/fmpz.h>
+#include <flint/fmpz_poly.h>
+#include <flint/fmpz_mod_poly.h>
 
 #include "../cff_internals.h"
 

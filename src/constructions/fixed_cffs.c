@@ -405,10 +405,10 @@ void cff_table_add_fixed_cffs(cff_table_ctx_t *ctx)
     update_table(table, 15, 42, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
     update_table(table, 16, 48, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
     update_table(table, 17, 68, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
-    update_table(table, 18, 76, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
-    update_table(table, 19, 90, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
-    update_table(table, 20, 120, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
-    update_table(table, 21, 176, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
+    update_table(table, 18, 69, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
+    update_table(table, 19, 76, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
+    update_table(table, 20, 90, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
+    update_table(table, 21, 120, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
     update_table(table, 22, 176, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
     update_table(table, 23, 253, CFF_CONSTRUCTION_ID_FIXED_CFF, 0, 0, 0, 0, 0);
 }
